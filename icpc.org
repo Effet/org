@@ -1,0 +1,2614 @@
+#+TITLE: Algorithm & Formulas For ACM/ICPC
+#+OPTIONS: num:t toc:t \n:nil LaTeX:t
+#+STARTUP: indent
+#+MATHJAX: align:"left"
+
+* Divide & Conquer 分治
+** Binary Search 二分查找
+#+begin_src cpp
+const int MAXN = 1000;
+
+/* 找寻最近的大于n的位置 */
+LL q[MAXN+10];
+LL bsearch( LL n )
+{
+   LL l = 1, r = MAXN, m;
+   LL t;
+   while ( l < r )
+   {
+      m = (l+r)/2;
+      if ( q[m] >= n )
+      {
+         if ( q[m-1] < n )
+            return m;
+         else
+            r = m - 1;
+      }
+      else
+         l = m + 1;
+   }
+   return l;
+}
+#+end_src
+
+*** 二分离散
+#+begin_src cpp
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+const int MAXN = 100 + 10;
+int q[MAXN];
+int top;
+int bsearch( int x ){// 返回离散化后值 [0,n-1]
+   int l = 0, r = top - 1, m;
+   while( l <= r ){
+      m = (l+r)>>1;
+      if( q[m] == x )
+         return m;
+      else if( q[m] > x )
+         r = m - 1;
+      else
+         l = m + 1;
+   }
+}
+
+int main() {
+   int n, x[MAXN];
+   while ( cin >> n ) {
+      for ( int i = 0; i < n; ++ i )
+         cin >> x[i];
+
+      // insert
+      for ( int i = 0; i < n; ++ i )
+         q[top++] = x[i];
+
+      // 二分离散化
+      sort( q, q+top );
+      int j = 1;
+      for ( int i = 1; i < top; ++ i )
+         if ( q[i] != q[i-1] ) // 删除重复元素
+            q[j++] = q[i];
+      top = j;
+
+      // 变更为离散化后的值
+      for ( int i = 0; i < n; ++ i )
+         x[i] = bsearch( x[i] );
+
+      // 原来的值
+      for ( int i = 0; i < n; ++ i )
+         cout << q[x[i]] << ' ';
+      cout << endl;
+
+   }
+   return 0;
+}
+#+end_src
+
+** Divide Tree 划分树
+- Refers to:
+  - http://www.notonlysuccess.com/index.php/divide-tree/
+  - http://acm.bjtu.edu.cn:8080/wiki/?tag=%E5%88%92%E5%88%86%E6%A0%91
+
+#+begin_src cpp
+// Refers to:
+//   http://www.notonlysuccess.com/index.php/divide-tree/
+//   http://acm.bjtu.edu.cn:8080/wiki/?tag=%E5%88%92%E5%88%86%E6%A0%91
+
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+
+
+const int MAX_LEN  = 100000 + 5; // 10^5
+const int MAX_DEEP = 20;         // The deep of segment tree.
+
+
+int sorted           [MAX_LEN]; // The sorted array.
+int toLeft [MAX_DEEP][MAX_LEN]; // Counts to the left in [l, i]. (i determine l)
+int values [MAX_DEEP][MAX_LEN]; // Values stored in each segment tree's node.
+
+
+// Building segment tree T(l, r).
+void build(int l, int r, int d = 0)
+{
+	if(l == r) return ;
+	int mid = (l + r) >> 1;
+    
+	int lsame = mid - l + 1;    // Count of numbers equal to sorted[mid].
+	for(int i = l; i <= r; ++ i)
+		if(values[d][i] < sorted[mid])
+			-- lsame;
+    
+	int lpos = l;
+	int rpos = mid + 1;
+	int cnt  = 0;
+	for(int i = l; i <= r; ++ i)
+    {
+		if(values[d][i] < sorted[mid])
+        {
+			values[d+1][lpos++] = values[d][i];
+            ++ cnt;
+		}
+        else if (values[d][i] == sorted[mid] && lsame)
+        {
+            values[d+1][lpos++] = values[d][i];
+            ++ cnt;
+            -- lsame;
+        }
+        else
+			values[d+1][rpos++] = values[d][i];
+        
+        toLeft[d][i] = cnt;
+	}
+    
+	build(l,     mid, d+1);
+	build(mid+1, r,   d+1);
+}
+
+
+// Query for Kth-number in [L,R] on the segment tree T(l, r).
+int query(int L, int R, int k, int l, int r, int d = 0)
+{
+	if(L == R)
+		return values[d][L];
+
+    int mid = (l + r) >> 1;
+    
+    int left1 = (L > l ? toLeft[d][L-1] : 0); // Count to the left in [l, L-1].
+    int left2 = toLeft[d][R] - left1;         // Count to the left in [L, R].
+    
+    if(left2 >= k)              // K-th number in left-son of [L, R].
+    {
+        int newl = l + left1;
+        int newr = l + left1 + left2 - 1;
+        return query(newl, newr, k, l, mid, d+1);
+    }
+    else
+    {
+        int right1 = L - l - left1;     // Count to the right in [l, L-1].
+        int right2 = R - L + 1 - left2; // Count to the right in [L, R].
+        int newl = mid + right1 + 1;
+        int newr = mid + right1 + right2;
+        return query(newl, newr, k-left2, mid+1, r, d+1);
+    }
+}
+
+
+int main()
+{
+    int n, m;
+    // `n' is length of sequence, `m' is count of querys.
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; ++i)
+    {
+        scanf("%d", &values[0][i]);
+        sorted[i] = values[0][i];
+    }
+    sort(sorted + 1, sorted + n + 1);
+    build(1, n);
+    while (m--)
+    {
+        int l, r, k;
+        // Query the K-th number of [l, r].
+        scanf("%d%d%d", &l, &r, &k);
+        printf("%d\n", query(l, r, k, 1, n));
+    }
+    return 0;
+}
+#+end_src
+
+** Tree Reconstruction 树重建
+- 已知先序序列 & 中序序列， 求后序序列：
+#+begin_src cpp
+#include<iostream>
+#include<cstdio>
+#include<string>
+using namespace std;
+
+struct Node
+{
+   char data;
+   Node * lchild;
+   Node * rchild;
+};
+
+Node* CreatTree(string pre, string in)
+{
+   Node * root = NULL;  //树的初始化
+   if(pre.length() > 0)
+   {
+      root = new Node;  //为根结点申请结构体所需要的内存
+      root->data = pre[0]; //先序序列的第一个元素为根结点
+      int index = in.find(root->data);  //查找中序序列中的根结点位置
+      root->lchild = CreatTree(pre.substr(1, index), in.substr(0, index));  //递归创建左子树
+      root->rchild = CreatTree(pre.substr(index + 1), in.substr(index + 1)); //递归创建右子树
+   }
+   return root;
+}
+
+void PostOrder(Node * root)  //递归后序遍历
+{ 
+   if(root != NULL)
+   {
+      PostOrder(root->lchild);
+      PostOrder(root->rchild);
+      cout<<root->data;
+   }
+}
+
+int main()
+{
+   string pre_str, in_str;
+   Node *root;
+   while(cin>>pre_str>>in_str)
+   {
+      root = CreatTree(pre_str, in_str);
+      PostOrder(root);
+      cout<<endl;
+   }
+   return 0;
+}        
+#+end_src
+
+* right-to-left binary method
+** right-to-left binary exponentiation
+http://primes.utm.edu/glossary/xpage/BinaryExponentiation.html
+** Fast Fibonacci
+#+begin_src cpp
+#include <iostream>
+#define mod 10000
+
+int fibonacci(int n) {
+   int ra,rb,a,b,x,y;
+   if (n<2) return n;
+   ra=rb=a=b=1;
+   n-=2;
+   while (n) {
+      if (n&1) {
+         x=ra*a+rb*b;
+         y=ra*b+rb*(a-b+mod);
+         ra=x%mod;rb=y%mod;
+      }
+      n>>=1;
+      x=a*a+b*b;
+      y=(2*a+mod)*b-b*b;
+      a=x%mod;b=y%mod;
+   }
+   return ra;
+}
+
+int main() {
+   for (int n;scanf("%d",&n),n!=-1;) {
+      printf("%d\n",fibonacci(n));
+   } return 0;
+}
+#+end_src
+
++ [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3914][UVA/12470 - Tribonacci]]
+  - A: 矩阵连乘Fibonacci扩展。
+
+* Number Theory 数论
+** GCD (Greatest Common Divisor) 最大公约数
+*** Euclidean Algorithm 辗转相除法
+- \(\gcd(a, b) = \gcd(b, a \bmod b)\)
+#+begin_src cpp
+int gcd(int a,int b) {
+	return b ? gcd(b, a%b) : a;
+}
+#+end_src
+
+- 非递归形式
+#+begin_src cpp
+typedef long long ll;
+
+ll gcd(ll a,ll b){
+    if (a == 0) return 1;
+    if (a < 0) return gcd(-a,b);
+    while (b) {
+        ll t=a%b; a=b; b=t;
+    }
+    return a;
+}
+
+
+//据说是运行次数最少的
+int gcd( int a, int b )
+{
+   if (a == 0) return 1;
+   if (a < 0) return gcd(-a,b);
+   int r, e;
+   while (b != 0)
+   {
+      r = a%b;
+      e = b-r;
+      if (r > e) //需要改成 |r| > |e|
+         r = e;
+
+      a = b;
+      b = r;
+   }
+   return a;
+}
+#+end_src
+
+*** Extended GCD
+- [[http://zh.wikipedia.org/wiki/%E8%A3%B4%E8%9C%80%E5%AE%9A%E7%90%86][Bézout's identity 裴蜀定理]]\\
+  对任意两个整数\(a\)、\(b\)，设\(d\)是它们的最大公约数。
+  那么关于未知数\(x\)和\(y\)的线性丢番图方程（称为裴蜀等式）：
+  \[ax + by = m\]
+  有整数解\((x，y)\)当且仅当\(m\)是\(d\)的倍数。裴蜀等式有解时必然有无穷多个解。
+  \(m=1\)时，方程有解当且仅当\(a\)、\(b\)互质。
+
+  方程有解时，解的集合是
+  \[
+  \left\{\left(\frac{m}{d}\left(x0 + k\frac{b}{d}\right), \frac{m}{d}\left(y0 - k\frac{a}{d}\right)\right) \mid k\in\mathbb{Z} \right\}
+  \]
+  其中\((x0,y0)\)是方程\(ax + by = d\)的一个解，可由辗转相除法得到。
+  所有解中，有且仅有一个解\((x,y)\)满足\(-b \leq x \leq b\)，\(-a \leq y \leq a\)。
+
+#+begin_src cpp
+typedef long long ll;
+
+ll ex_gcd(ll a, ll b, ll& x, ll& y)
+{
+   ll d;
+   if (b == 0) {
+       x = 1; y = 0;
+       return a;
+   }
+   d  = ex_gcd(b, a%b, y, x);
+   y -= a/b * x;
+   return d;
+}
+#+end_src
+
+** Prime Numbers 素数
+- [[http://en.wikipedia.org/wiki/Prime-counting_function#Table_of_.CF.80.28x.29.2C_x_.2F_ln_x.2C_and_li.28x.29][素数个数]]
+   |     x |          \pi(x) |
+   |-------+-----------------|
+   |   <r> |             <r> |
+   |    10 |               4 |
+   |  10^2 |              25 |
+   |  10^3 |             168 |
+   |  10^4 |           1,229 |
+   |  10^5 |           9,592 |
+   |  10^6 |          78,498 |
+   |  10^7 |         664,579 |
+   |  10^8 |       5,761,455 |
+   |  10^9 |      50,847,534 |
+   | 10^10 |     455,052,511 |
+   | 10^11 |   4,118,054,813 |
+   | 10^12 |  37,607,912,018 |
+   | 10^13 | 346,065,536,839 |
+*** Sieve of Eratosthenes 素数筛选法
+#+begin_src cpp
+#include <ctime>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+using namespace std;
+
+// 前 10^7 个数中有 664,579个素数
+const int Limit = 10000000;
+
+bool sieve[Limit + 1];
+// int primes[Limit / 2 + 1];
+int primes[664590];
+
+
+void Sieve_of_Eratosthenes()
+{
+    for (int i = 4; i <= Limit; i += 2) sieve[i] = 1;
+	for (int i = 3; i * i <= Limit; i += 2)
+        if (!sieve[i])
+            for (int j = i * i; j <= Limit; j += i)
+                sieve[j] = 1;
+    
+    primes[0] = 1; primes[1] = 2;
+	for(int i = 3; i <= Limit; i += 2)
+		if(!sieve[i])
+			primes[++ primes[0]] = i;
+}
+
+
+// http://blog.sina.com.cn/s/blog_48f85e1d0100ns71.html
+void Sieve_of_Eratosthenes_2(){ //传说中的2倍压缩筛选素数
+    int sievelimit = (sqrt(Limit + .0) - 1) / 2; //只需筛到一半
+    int maxindex = (Limit - 1) / 2;
+    for(int n = 1; n <= sievelimit; ++ n){
+        if(sieve[n] == 0){
+            int t = 2*n + 1; //每次表示域增加2n+1
+            for(int k = 2*n*(n+1); k <= maxindex; k += t) //从2n(n+1)开始
+                sieve[k] = 1;
+        }
+    }
+    primes[0] = 1; primes[1] = 2;
+    for(int n = 1; n <= maxindex; ++ n){
+        if(sieve[n]==0)
+            primes[++ primes[0]] = 2*n+1;//p[n]==0表示的是2*n+1是素数
+    }
+}
+
+
+// http://en.wikipedia.org/wiki/Sieve_of_Atkin
+void Sieve_of_Atkin()
+{
+    int root = (int)ceil(sqrt(Limit + .0));
+    for (int z = 0; z <= Limit; ++ z) sieve[z] = 0;
+    for (int x = 1; x <= root; ++ x)
+    {
+        for (int y = 1; y <= root; ++ y)
+        {
+            int n = 4*x*x + y*y;
+            if (n <= Limit && (n % 12 == 1 || n % 12 == 5)) sieve[n] ^= 1;
+            n = 3*x*x + y*y;
+            if (n <= Limit && n % 12 == 7) sieve[n] ^= 1;
+            n = 3*x*x - y*y;
+            if (x > y && n <= Limit && n % 12 == 11) sieve[n] ^= 1;
+        }
+    }
+    for (int r = 5; r <= root; ++ r)
+        if (sieve[r])
+            for (int i = r*r; i <= Limit; i += r*r)
+                sieve[i] = 0;
+    
+    primes[0] = primes[1] = 2; primes[2] = 3;
+    for (int a = 5; a <= Limit; ++ a)
+        if (sieve[a])
+            primes[++ primes[0]] = a;
+}
+
+
+void test(char *title, void run())
+{
+    time_t op, ed;
+    op = clock();
+    
+    run();
+    
+    ed = clock();
+
+    double dif = (ed - op) * 1000.0 / CLOCKS_PER_SEC;
+    printf("Testing %s ...\n", title);
+    printf("primes: %d, time use: %.3lf ms.\n", primes[0], dif);
+}
+
+
+int main(int argc, char *argv[])
+{
+    test("Sieve of Eratosthenes",
+         Sieve_of_Eratosthenes);
+    
+    memset(sieve, 0, sizeof(sieve));
+    test("Sieve of Eratosthenes 2",
+         Sieve_of_Eratosthenes_2);
+    
+    memset(sieve, 0, sizeof(sieve));
+    test("Sieve of Atkin",
+         Sieve_of_Atkin);
+    return 0;
+}
+#+end_src
+
+*** TODO Miller-Rabin大数判素模板 poLLard-rho大数分解模板
+- http://blog.ac521.org/?p=533
+
+** 因数
++ [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=2716][UVA/11669 - Non-Decreasing Prime Sequence]]
+  - Q: 一数范围[a, b]中所有数按素因子序列长度排序（如10为2,2,5），长度相同时按字典序排。问第k小数的素因子序列。
+  - A: O(n) 分解 2 ~ 1000000 质因子，排序后转化为区间第k小数问题（划分树）。
+** Modular Arithmetic 模运算
+*** Modular Exponentiation 快速幂取模
+#+begin_src cpp
+typedef long long ll;
+int fastpow(ll a, int b, int c)
+{
+    ll r = 1 % c;
+    while(b)
+    {
+        if (b & 1)
+            r = r * a % c;
+        b >>= 1;
+        a = a * a % c;
+    }
+    return (int)r;
+}
+#+end_src
+
+http://stackoverflow.com/questions/9818129/fastest-algorithm-to-compute-a2nm
+
+*** Modular Multiplicative Inverse 乘法逆元
+*** Congruence 同余
+- [[http://zh.wikipedia.org/wiki/%E5%90%8C%E4%BD%99#.E6.80.A7.E8.B4.A8][性质]]
+  - \(\large a \equiv b \pmod{m} \Rightarrow m | (a-b)\)
+
+  - 传递性
+    \[
+    \left. \begin{matrix}
+    a \equiv b \pmod{m} \\
+    b \equiv c \pmod{m}
+    \end{matrix} \right\} \Rightarrow a \equiv c \pmod{m}
+    \]
+
+  - 加减
+    \[
+    \left. \begin{matrix}
+    a \equiv b \pmod{m} \\
+    c \equiv d\pmod{m}
+    \end{matrix} \right\} \Rightarrow \left\{ \begin{matrix} a \pm c \equiv b \pm d \pmod{m} \\ ac \equiv bd \pmod{m} \end{matrix} \right.
+    \]
+
+  - 变小
+    \[a \equiv b \pmod{cn} \Rightarrow a \equiv b \pmod n\]
+    \[
+    \left. \begin{matrix}
+    a \equiv b \pmod{m} \\
+    n|m
+    \end{matrix} \right\} \Rightarrow a \equiv b \pmod n
+    \]
+
+  - 线性同余解的性质
+    \[
+    \left. \begin{matrix}
+    a \equiv b \pmod{m_1} \\
+    a \equiv b \pmod{m_2} \\
+    \vdots \\
+    a \equiv b \pmod{m_n} \\
+    (n \ge 2)
+    \end{matrix} \right\} \Rightarrow a \equiv b \pmod{lcm(m_1,m_2,\cdots,m_n)}
+    \]
+
+*** Linear Congruence Theorem 线性同余方程
+see: http://zh.wikipedia.org/wiki/线性同余方程
+
+形如 \(ax \equiv b \pmod{n}\) 的方程当且仅当 \(\gcd(a,n)|b\) 时有解，解为
+\[
+\left\{ x_0 + k\frac{n}{\gcd(a,n)} \mid k \in \mathbb{Z} \right\}.
+\]
+在 \(\mod{n}\) 的完全剩余系 \({0,1,\cdots,n-1}\) 中，恰有 \(d\) 个解。
+
+- 求解\\
+  若 \(\gcd(a,n)|b\) ，
+  由裴蜀定理，存在整数对 \((r,s)\) 使得 \(ar + sn = \gcd(a,n)\)，因此 \(\large x = r\frac{b}{\gcd(a,n)}\) 是方程的一个解。
+  其他的解都关于 \(\large\frac{n}{\gcd(a,n)}\) 与 \(x\) 同余。
+
+*** Chinese Remainder Theorem 中国剩余定理 (线性同余方程组)
+- 定义
+  \(n_1,n_2,\cdots,n_k\) 两两互质，对于序列\(a_1,a_2,\cdots,a_k\)，满足以下同余方程组，求解 \(x\) 。
+  \[
+  \begin{align}
+  x &\equiv a_1 \pmod{n_1} \\
+  x &\equiv a_2 \pmod{n_2} \\
+  &{}\  \  \vdots \\
+  x &\equiv a_k \pmod{n_k}
+  \end{align}
+  \]
+
+see: http://www.stubc.com/thread-2918-1-7.html
+#+begin_src cpp
+typedef long long ll;
+
+ll ex_gcd(ll a, ll b, ll& x, ll& y)
+{
+   ll d;
+   if (b == 0) {
+       x = 1; y = 0;
+       return a;
+   }
+   d  = ex_gcd(b, a%b, y, x);
+   y -= a/b * x;
+   return d;
+}
+
+ll Chinese_Remainder(ll* a, ll* n, int k) {
+    ll N = 1, r = 0;
+    for (int i = 0; i < k; ++ i)
+        N *= n[i];
+    for (int i = 0; i < k; ++ i)
+    {
+        ll m = N / n[i], x, y;
+        ex_gcd(m, n[i], x, y);
+        x = (x % n[i] + n[i]) % n[i];
+        r = (r + a[i]*m*x) % N;
+    }
+    return r;
+}
+#+end_src
+
+- [[http://acm.fzu.edu.cn/problem.php?pid=1402][FZU/1402 - 猪的安家]]
+  - A: 模板题
+
+对于一般的情况（即 \(n_1,n_2,\cdots,n_k\) 不两两互质），则满足
+\[
+a_i \equiv a_j \pmod{\gcd(n_i,n_j)} \qquad \text{for all }i\text{ and }j.
+\]
+时，[[http://en.wikipedia.org/wiki/Chinese_remainder_theorem#Theorem_statement][有解]]。
+
+see: http://en.wikipedia.org/wiki/Chinese_remainder_theorem#Solution_for_non-coprime_moduli\\
+see: http://yzmduncan.iteye.com/blog/1323599\\
+see: http://scturtle.is-programmer.com/posts/19363
+#+begin_src cpp
+typedef long long ll;
+typedef pair<ll,ll> mod_p;
+
+ll ex_gcd(ll a, ll b, ll& x, ll& y)
+{
+   ll d;
+   if (b == 0) {
+       x = 1; y = 0;
+       return a;
+   }
+   d  = ex_gcd(b, a%b, y, x);
+   y -= a/b * x;
+   return d;
+}
+
+mod_p Chinese_Remainer_Non_Coprime(vector<mod_p> C)
+{
+    int k = C.size();
+    if (k <= 0)
+        return make_pair(-1, -1);
+    for (int i = k - 2; i >= 0; -- i)
+    {
+        ll a1 = C[i].first,   n1 = C[i].second;
+        ll a2 = C[i+1].first, n2 = C[i+1].second;
+
+        ll c = a2 - a1, p1, p2;
+        ll d = ex_gcd(n1, n2, p1, p2);
+
+        if (c % d != 0)
+            return make_pair(-1, -1);
+
+        ll t = n2 / d;
+        p1 = (c / d * p1 % t + t) % t;
+        ll a0 = a1 + n1 * p1;
+        ll n0 = n1/d * n2;
+        a0 = (a0 % n0 + n0) % n0;
+
+        C[i] = make_pair(a0, n0);
+    }
+    return C[0];
+}
+#+end_src
+
+- [[http://poj.org/problem?id%3D2891][POJ/2891 - Strange Way to Express Integers]]
+  - A: 模板题
+- [[http://acm.hdu.edu.cn/showproblem.php?pid=1573][HDU/1573 - X问题]]
+  - Q: 求非互质同余方程组解\(1 \leq x \leq n\)的个数
+  - A: 注意0不是解
+*** Fermat's little theorem 费马小定理
+- 若\(p\)为质数，\(\large a^{p} \equiv a \pmod{p}\)
+- 若\(a\)不是\(p\)的倍数，\(\large a^{p-1} \equiv 1 \pmod{p}\)
+*** Euler's theorem 欧拉定理
+- 若\(a\),\(n\)互质，\(\large a^{\varphi(n)} \equiv 1 \pmod{n}\)
+- 求\(\varphi(n)\)
+#+begin_src cpp
+int eular(int n)
+{
+	int r = n;
+	for(int i = 2; i * i <= n; ++ i)
+        if(n % i == 0) {
+            r -= r/i;
+            while(n % i == 0)
+                n /= i;
+        }
+	if(n != 1)
+        r -= r/n;
+	return r;
+}
+#+end_src
+- 预处理版本
+#+begin_src cpp
+const int MAX_N = 100000 + 100;
+
+int phi[MAX_N];
+
+void euler()
+{
+    for(int i = 1; i < MAX_N; ++ i) phi[i]=i;
+    for(int i = 2; i < MAX_N; i+=2) phi[i]/=2;
+    for(int i = 3; i < MAX_N; i+=2)
+        if(phi[i] == i)
+            for(int j = i ; j < MAX_N; j+=i)
+                phi[j] = phi[j]/i * (i-1);
+}
+#+end_src
+
+*** 指数循环节
+- [[http://hi.baidu.com/aekdycoin/item/e493adc9a7c0870bad092fd9][AC大牛blog]]
+\(x \geq \varphi(n)\)时，
+\[
+\Large A^x \equiv A^{x \mod \varphi(C) + \varphi(C)} \pmod{C}
+\]
+** Factorial 阶乘
+*** 素因子 p 在 n! 中的个数
+#+begin_src cpp
+//how many p in n!
+int prime_factorial(int p, int n)
+{
+	int cnt = 0, r = n/p;
+	while (r) {
+		cnt+=r; r/=p;
+	}
+	return cnt;
+}
+#+end_src
+
+** Digital Roots 数根
+see: http://en.wikipedia.org/wiki/Digital_root
++ [[http://poj.org/problem?id=1519][POJ/1519 - Digital Roots]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=1013][HDU/1013 - Digital Roots]]
+  - A: \(dr(n) = 1 + [n-1\pmod 9]\)
+
+** 应用/综合
++ [[http://acm.hdu.edu.cn/showproblem.php?pid%3D4335][HDU/4335 - What is N?]]
+  - Q: 满足\(n^{n!} \equiv b \pmod{P} : (0 \leq n \leq M)\) 的 n 有几个。
+    其中 \(0 \leq p \leq 10^5, 1 \leq M \leq 2^{64} - 1\)\\
+  - A: 利用指数的循环节，小范围暴力\(0 \leq n \leq P\)即可。
+
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4350][HDU/4350 - Card]]
+  - A: 可从相对位置不变（环）推得，最小循环长度为\(\frac{R}{\gcd(R,R-L+1)}\)。
+* 组合数学
+- http://blog.himdd.com/?cat=69
+** 错排问题的递推解决
+- http://blog.pfan.cn/cruxd/17413.html
+- http://blog.himdd.com/?p=1496
+** 不相邻重排列
+** 其他题目
++ [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3907][UVA/12464 - Professor Lazy, Ph.D.]]
+  - A: 《具体数学》第一章课后习题，循环节为5。
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4359][HDU/4359 - Easy Tree DP?]]
+  - Q: 构建二叉树，N个节点值分别为\(2^0,2^1,\cdots,2^{n-1}\)，求规定深度为D时，不同构建的种类数。
+    （其中若某节点存在左右子树时，须满足左子树所有节点和小于右子树所有节点和）
+  - A: 因为只需要保持相对关系即可，所有的状态可压缩到dp[N][D]（表示N个点D深度的二叉树的种类数）并乘以组合种类。
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=3723][HDU/3723 - Delta Wave]]
+  - Q: 从(0,0)点走到(N,0)点只能右上、右、右下走(不能走到x轴以下)，问有多少种不同走法？
+  - A: 考虑到任意一个可行的路径中任意一个路径中的位置右上走的次数一定大于等于右下走的次数（不然会到x轴以下），
+    则枚举N步中K对右上/右下，问题即转化为经典的Catalan数问题。
+** 上下不着边问题
++ [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3795][UVA/12373 - Pair of Touching Circles]]
+  - Q:
++ [[http://acm.zju.edu.cn/onlinejudge/showProblem.do?problemCode=3647][ZOJ/3647 - Gao the Grid]]
+  - A: 即是上下左右不相接的问题，转化为上下左右固定的问题，两次求和即可
+** 树
++ [[http://codeforces.com/problemset/problem/229/C][CF/229C - Triangles]]
+  - Q: 一个完全图分成两个部分(A, B)，问两个部分一共有多少个三角环路
+  - A: 容斥 C(n, 3) - C(m, 1)*C(n, 2) + sum(C(di, 2))  [m为B图边的个数，di为i点的度数B图中的度数]
+* TODO Combination 组合数学2
+#+begin_src latex
+\subsection{Combination Identities 组合恒等式}
+${n}\choose{r}$ is the number of r-element subsets of an n-element set\cite{comb1}, and
+\begin{equation}
+{{n}\choose{r}} = \frac{n!}{r!(n-r)!}
+\end{equation}
+Mirror Identity 对称性质
+\begin{equation}
+{{n}\choose{r}} = {{n}\choose{n-r}}
+\end{equation}
+
+\subsubsection{Pascal's Triangle}
+Pascal's Triangle Identity\cite{comb1}.
+\begin{equation}
+{{n}\choose{r}} = {{n-1}\choose{r-1}} + {{n-1}\choose{r}}
+\end{equation}
+Extended Pascal's Triangle Identity\cite{comb1}.
+\begin{equation}
+{{n}\choose{r}} = \sum \limits_{i=0}^k{{{n-k}\choose{r-k-i}}{{k}\choose{i}}}
+\end{equation}
+
+\subsubsection{Row's sum}
+Binomial theorem. 二项式定理
+\begin{equation}
+\sum \limits_{k=0}^n{{n}\choose{k}} = 2^n
+\end{equation}
+平方和：The sum of the squares of the elements of row n equals the middle element of row $(2n - 1)$ \cite{comb2}.
+\begin{equation}
+\sum \limits_{k=0}^n{{{n}\choose{k}}^2} = {{2n}\choose{n}}
+\end{equation}
+
+\subsubsection{Diagonal's sum}
+Diagonal sum\cite{comb1}. 对角和
+\begin{equation}
+\sum \limits_{i=r}^n{{i}\choose{r}} = {{n+1}\choose{r+1}}
+\end{equation}
+Second order diagonal sum\cite{comb1}.
+\begin{equation}
+\sum \limits_{i=r}^n{(n-i+1){{i}\choose{r}}} = {{n+2}\choose{r+2}}
+\end{equation}
+K-th order diagonal sum\cite{comb1}.
+\begin{equation}
+\sum \limits_{i=r}^n{{{n-i+k-1}\choose{k-1}}{{i}\choose{r}}} = {{n+k}\choose{r+k}}
+\end{equation}
+The ``shallow diagonals'' of Pascal's triangle sum to Fibonacci numbers\cite{comb3},
+\begin{equation}
+\sum \limits_{k=0}^{\lfloor n/2 \rfloor}{{n-k}\choose{k}} = F_{n+1}
+\end{equation}
+
+\subsection{Figurate number 形数}
+The simplicial polytopic numbers for r = 1, 2, 3, 4, ... are:\cite{comb4}
+
+\begin{equation}
+P_1(n) = \frac{n}{1} = {{n+0}\choose{1}}
+\end{equation}
+\begin{equation}
+P_2(n) = \frac{n(n+1)}{2} = {{n+1}\choose{2}} \mbox{(triangular numbers)}
+\end{equation}
+\begin{equation}
+P_3(n) = \frac{n(n+1)(n+2)}{6} = {{n+2}\choose{3}}
+\end{equation}
+\begin{equation}
+P_4(n) = \frac{n(n+1)(n+2)(n+3)}{24} = {{n+3}\choose{4}}
+\end{equation}
+\ldots
+\begin{equation}
+P_r(n) = \frac{n(n+1)(n+2)\ldots(n+r-1)}{r!} = {{n+r-1}\choose{r}}
+\end{equation}
+
+\subsection{Catalan number}
+#+end_src
+
+* TODO 博弈
+# - [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3913][UVA/12469 - Stones]]
+#   - Q: 
+#   - A:
+http://www.chenyajun.com/2010/06/22/4360
+
+* 概率
+** 全概率
++ [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3904][UVA/12461 - Airplane]]
+  - Q: N人 *依次入座* ，第一个人随机坐1~N号座位，
+    其他人(i号人)若i号座位没有被占则坐i号座位，否则剩下空的位置随机坐，
+    问N号人不坐自己位置的概率。
+  - A: 《编程之美》 - 金刚坐飞机问题。其中第i个人坐自己位置的概率 \(\large P(i)=\frac{N-i+1}{N-i+2}\)
+
+* Computational Geometry 计算几何
+- 计算几何中的精度问题
+  http://hi.baidu.com/xh176233756/item/dc7c50c50451c27588ad9ef7
+
+** 旋转卡壳
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=2838][UVALive/4837 - Gunshots]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=3684][HDU/3684 - Gunshots]]
+  - Q: 100个多边形(每个1000个点)，10000条射线，问每条射线最先射到哪个多边形，没有输出MISS
+  - A: 将多边形做成凸包与原问题等价，用离线的做法：将所有射线极角排序，同时做100个凸包的旋转卡壳。
+
+POJ/3608 凸多边形间距离
+
+** 几何变换
++ [[http://acm.zju.edu.cn/onlinejudge/showProblem.do?problemId=3782][ZOJ/3338 - Map]]
+  - Q: 将二维矩形仿射变换后求座标没有变化的点
+  - A: 求出复合矩阵后解二元一次方程即可
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3101][UVALive/5100 - Shade of Hallelujah Mountain]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=3692][HDU/3692 - Shade of Hallelujah Mountain]]
+  - Q: 一凸多面体，一点光源，一平面，求凸包在平面的阴影面积。
+  - A: 先判断面积为零：点光源相对于平面在所有点之下，面积无穷：点在最高点与最低点之间；
+       面积由穷时，将点光源到所有点的射线与平面交，将所有交点随平面旋转至z=k的平面，做二维凸包面积即可。
+
+** 圆问题
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=4023][UVAlive/6012 - Fence]]
+  - Q: 多圆求凸包
+  - A: 计算任意两圆不相交切线的四个切点，将所有点做凸包即可。
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4116][HDU/4116 - Fruit Ninja]]
+  - Q: 求平面一直线最多能交几个圆
+  - A: 推论：最优直线可为某一圆切线。
+
++ [[http://acm.sgu.ru/problem.php?contest=0&problem=435][SGU/435 - UFO Circles]]
+  - Q: 多圆并，求交了奇数次的面积和偶数次的面积
+  - A: 本质是多圆并交k次的面积问题。
+
+SPOJ/CIRU VCIRCLES CIRUT
+UVALive/4492 HDU/3239
+UVALive/4530
+
++ [[http://poj.org/problem?id=4048][POJ/4048 - Chinese Repeating Crossbow]]
+  - Q: 由一起点发射的射线最多交多少线段
+  - A: 转化为角度（斜率）
+
++ [[http://poj.org/problem?id=2986][POJ/2986 - A Triangle and a Circle]] or [[http://poj.org/problem?id=3675][POJ/3675 - Telescope]] or [[http://acm.zju.edu.cn/onlinejudge/showProblem.do?problemCode=2675][ZOJ/2675 - Little Mammoth]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=4404][HDU/4404 - Worms]]
+  - A: 圆与简单多边形相交面积问题
+
+UVA/11978 LightOJ/1358
+
+
+HDU/3007 ZOJ/1450 最小圆覆盖
+
+** 三角形问题
++ [[http://acm.fzu.edu.cn/problem.php?pid=1973][FZU/1973 - How many stars]]
+  - Q: 平面n点，m次询问，每次询问任意三点三角形中点的个数
+  - A: 预处理以任意点为中心每个点从(-INF,0)开始旋转的点的个数，之后作差即可知道任意三点旋转角中点的个数，
+       最后可拼接出三点中点的个数（类似面积处理）
+** 三维凸包
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4266][HDU/4266 - The Worm in the Apple]]
+  - Q: 一空间凸多面体中一点距其表面最近距离
+  - A: 求空间凸包，枚举各面与点距离
+HDU/3662
+
+** 其他题目
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=3685][HDU/3685 - Rotational Painting]]
+  - Q: 问一多边形竖放能立起的方法数
+  - A: 等价于将多边形做凸包，有多少边在重心相对位置的两边
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3008][UVALive/5007 - Detector Placement]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=3712][HDU/3712 - Detector Placement]] or [[http://acm.zju.edu.cn/onlinejudge/showProblem.do?problemCode=3419][ZOJ/3419 - Detector Placement]]
+  - Q: 一点光源朝一个方向发射，平面上有一三棱镜（折射率u），问最终光在x轴上的交点。
+  - A: 硬做，处理向量旋转
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4401][HDU/4401 - Battery]]
+  - Q: 一线段（太阳能电池）上有n个杆子，位置在线段上a1,a2...an，高度分别为h1,h2...hn，太阳从t1时间到t2时间，获得的电能
+       若一时刻太阳与地面夹角为th，则单位长度，单位时间获得的电能为sin(th)
+  - A: 做好上凸包后，分段积分。
++ [[http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1066][Aizu/1066 - Legend of Storia]]
+  - Q: 一简单多边形内切于一圆中滚动，问滚Q次，每次的支点座标
+  - A: 直接做（模拟）
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=514&page=show_problem&problem=3978][UVALive/5967 - The Falling Circle]]
+  - A: 求两圆切线，各种处理
+
+* 计算几何2
+#+begin_src latex
+\newcommand{\cgeo}[1]{\lstinputlisting[language=C++]{code/computational-geometry/#1}}
+
+\section{计算几何}
+
+\subsection{二维几何}
+\subsubsection{基本函数}
+\cgeo{2D.d/00-2D-common.cc}
+\subsubsection{判相交}
+\cgeo{2D.d/01-2D-is-intersect.cc}
+\subsubsection{点在线上投影(project)/对称点(reflect)}
+\cgeo{2D.d/02-2D-proj-ref.cc}
+\subsubsection{点点/点线/线段……各种距离}
+\cgeo{2D.d/03-2D-distance.cc}
+\subsubsection{直线交点}
+\cgeo{2D.d/04-2D-cross-line.cc}
+\subsubsection{各种三角形}
+\cgeo{2D.d/05-2D-triangle.cc}
+\subsubsection{多边形}
+\cgeo{2D.d/06-2D-polygon.cc}
+\subsubsection{圆}
+\cgeo{2D.d/07-2D-circle.cc}
+
+\subsection{三维几何}
+\subsubsection{新版本}
+\cgeo{3D.d/geo3d_v2.1.cpp}
+% \subsubsection{新版本}
+% \cgeo{3D.d/geo3d_v2.cpp}
+% \subsubsection{旧用版本}
+\cgeo{3D.d/geo3d.cpp}
+
+\subsection{凸包}
+\subsubsection{二维单调链}
+\cgeo{convex-hull/Monotone_Chain_Convex.cpp}
+\subsubsection{三维凸包}
+\cgeo{convex-hull/ch3d-tmp.cpp}
+
+
+\subsection{圆并/交}
+\subsubsection{SPOJ/CIRU,VCIRCLES}
+多圆面积并的面积
+\cgeo{2D.d/undering/circle-union/SPOJ-CIRU-VCIRCLES.cc}
+\subsubsection{SPOJ/CIRUT}
+扩展圆并，求交了k次的面积
+\cgeo{2D.d/undering/circle-union/SPOJ-CIRUT.cc}
+\subsubsection{SGU/435}
+求交了奇数次和偶数次的面积
+\cgeo{2D.d/undering/circle-union/SGU-435.cc}
+\subsubsection{CII/4492,HDU/3239}
+求圆并减去圆交，trick:要去除相同的圆
+然后求去除相同圆后k个圆的交
+\cgeo{2D.d/undering/circle-union/CII-4492-HDU-3239.cc}
+\subsubsection{CII/4530}
+求最多几个圆相交于一块区域，以及区域的块数
+\cgeo{2D.d/undering/circle-union/CII-4530.cc}
+
+\subsection{圆与线}
+\subsubsection{HDU/4116}
+求平面一直线最多能交几个圆。
+
+推论：最优直线可为某一圆切线。
+\cgeo{2D.d/undering/HDU-4116-line-cut-circle.cc}
+
+\subsection{圆凸包}
+\subsubsection{CII/6012}
+多圆求凸包，计算任意两圆不相交切线的四个切点，将所有点做凸包即可。
+\cgeo{2D.d/undering/CII-6012-circle-convex.cc}
+
+\subsection{圆环区间统计}
+\subsubsection{POJ/4048}
+由一起点发射的射线最多交多少线段
+\cgeo{2D.d/undering/POJ-4048-line-cut-segment.cc}
+
+\subsection{圆与多边形交}
+\subsubsection{POJ/2986,3675,ZOJ/2675,HDU/4404}
+\cgeo{2D.d/undering/circle-polygon-area.cpp}
+#+end_src
+* String Algorithm 字符串
+** KMP
+- [[http://www.matrix67.com/blog/archives/115][matrix67'blog]] 中基于算法导论的KMP算法：
+#+begin_src cpp
+//来源及参考:http://www.matrix67.com/blog/archives/115
+//（基于算法导论介绍的KMP算法）
+
+
+const int MAX_LEN = 100000 + 10;
+
+int pre[MAX_LEN];
+// pre[j] is max-number satisfy ``P[1 .. pre[j]] = P[[j-pre[j]+1 .. j]''.
+// String P[1 .. n].
+void make_prefix(char *P, int m)
+{
+   pre[1] = 0;
+   for (int i = 2, j = 0; i <= m; ++ i)
+   {
+      while (j > 0 && P[j+1] != P[i]) j = pre[j];
+      if (P[j+1] == P[i]) ++ j;
+      pre[i] = j;
+   }
+}
+
+// String T[1 .. n], P[1 .. m].
+void KMP(char *T, int n, char *P, int m)
+{
+   for (int i = 1, j = 0; i <= n; ++ i)
+   {
+      while (j > 0 && P[j+1] != T[i]) j = pre[j];
+      if ( P[j+1] == T[i] ) ++ j;
+      if ( j == m )
+      {
+         printf("Preattern occurs with shift %d\n", i - m);
+         j = pre[j];
+      }
+   }
+}
+#+end_src
+
+- 浙大模板中稍有不同的KMP算法：
+#+begin_src cpp
+//另一种解释，来源：浙大模板
+//fail[j]代表了，在t串在j点失配时（s[i] != t[j]）
+//应将t串j改变后的值，即t[1..fail[j]-1]仍是与s[i]匹配的，
+//这时候就是试验s[i] 是否与 t[fail[j]]相匹配了，否则再递归操作。
+const int maxlen = 1000;
+
+int fail[maxlen];
+void makefail( char *t, int lt )
+{
+    --t;
+    for(int i=1,j=0;i<=lt;i++,j++){
+        fail[i]=j;
+        while(j>0 && t[i]!=t[j]) j=fail[j];
+    }
+}
+
+// start matching pattern T in S[i..)
+// return match pos or longest match length with corresponding pos
+int kmp(char *s, int ls, char *t, int lt, int i,int &longest,int &lp)
+{
+    longest = lp = 0; --s; --t;
+    for(int j=1; i<=ls; i++,j++) {  
+        while( j>0 && s[i]!=t[j] ) j=fail[j];
+        if( j>longest ) { longest = j; lp = i-j; }
+        if( j==lt ) return i-lt;        
+    }
+    return -1;
+}
+#+end_src
+
+*** 字符串最小循环节
+- 基于KMP。
+#+begin_src cpp
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+using namespace std;
+
+const int MAX_LEN = 1000000 + 10;
+
+int pre[MAX_LEN];
+// pre[j] is max-number satisfy ``P[1 .. pre[j]] = P[[j-pre[j]+1 .. j]''.
+// String P[1 .. n].
+void make_prefix(char *P, int m)
+{
+   pre[1] = 0;
+   for (int i = 2, j = 0; i <= m; ++ i)
+   {
+      while (j > 0 && P[j+1] != P[i]) j = pre[j];
+      if (P[j+1] == P[i]) ++ j;
+      pre[i] = j;
+   }
+}
+
+
+char str[MAX_LEN];
+
+int main()
+{
+   // Use str[1 .. n].
+   while(scanf("%s", str + 1) != EOF)
+   {
+       if (str[1] == '.')
+           break;
+
+       int n = strlen(str + 1);
+       make_prefix(str, n);
+       
+       if(n % (n - pre[n]) == 0 && n/(n - pre[n]) >= 2)
+           printf("%d\n", n/(n-pre[n]));
+       else
+           printf("%d\n", 1);
+   }
+   return 0;
+}
+#+end_src
+
+- 例题：poj2406
+*** 扩展KMP
+
+** trie 字典树
+- 例题：poj3630
+#+begin_src cpp
+/*
+ * Problem name: Phone List
+ *  Solved when: 2011-7-6
+ *       Author: nesua
+ *  Description: 给一个电话列表，如果没有一个电话号码是另一个的前缀，
+ *  那么称这个电话列表的每个号码都是可拨的的。
+ *  比如一个电话列表:
+ *  	Emergency 911
+ *  	Alice 97625999
+ *  	Bob 91125426
+ *  在这个情况下，就不可能给Bob打电话，因为，当按到911时就直接接通Emergency了。
+ *  问，给你一个电话列表，确定它是否每个号码都可拨的。
+ *
+ *      解题思路: 可用字典树求解。
+ *      而在电话号码按字典序排列的前提下，可推得：
+ *      如果一个号码是另个号码的前缀，那么这个前缀必然出现在此号码之前且他们相邻，
+ *      也即是若一个号码的前一个号码不是此号码的前缀，那么电话列表中不存在此号码的前缀。
+ *      故将电话号码字典序排列后，比较两相邻电话号码即可。
+ *
+ *      难易程度: ★★★☆
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <iostream>
+#define MAXN 10
+#define MAXM 10000
+using namespace std;
+
+struct phon{
+   char str[MAXN+1];
+} p[MAXM+1];
+
+int cmp(const void *a, const void *b){
+   return strcmp((*(phon *) a).str, (*(phon *) b).str);
+}
+
+int compe(char *a, char *b){
+   for(int i = 0; i<strlen(a); i++)
+      if(a[i]!=b[i])
+         return 0;
+   return 1;
+}
+
+int cons(phon *p, int n){
+   int i;
+   for(i = 0; i<n-1; i++){
+      if(compe(p[i].str, p[i+1].str))
+         return 0;
+   }
+   return 1;
+}
+
+int main(){
+   int t, n, i;
+   while(scanf("%d", &t)!=EOF){
+      while(t--){
+         scanf("%d", &n);
+         for(i = 0; i<n; i++){
+            scanf("%s", p[i].str);
+         }
+         qsort(p, n, sizeof(p[0]), cmp);
+         printf(cons(p, n) ? "YES\n" : "NO\n");
+      }
+   }
+   return 0;
+}
+
+//静态Trie
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+using namespace std;
+#define HAS true
+#define NOT false
+
+const int L = 10000 + 10;
+const int N = 1<<16;
+
+struct Node {
+   bool    val, rod;
+   int     son[10];
+};
+
+Node q[N];
+int top;
+char s[L];
+bool flag;
+
+void clear() {
+   memset(q, 0, sizeof(q));
+   top = 1; flag = NOT;
+}
+
+void insert() {
+   int n = 0;
+   for( int i = 0; s[i]; ++i ) {
+      if(!q[n].son[s[i] - '0']){
+         q[n].son[s[i] - '0'] = top;
+         n = top;
+         ++ top;
+      }else{
+         n = q[n].son[s[i] - '0'];
+      }
+      if(s[i+1]) q[n].rod = true;
+      if(q[n].val) flag = HAS;
+   }
+   if(q[n].rod) flag = HAS;
+   q[n].val = true;
+}
+
+
+int main(){
+   freopen("POJ.in", "r", stdin);
+   int t, n;
+   scanf("%d", &t);
+   while(t--){
+      clear();
+
+      scanf("%d", &n);
+      for(int i=0;i<n;i++){
+         scanf("%s", s);
+         if(flag == NOT) insert();
+      }
+      if(flag == HAS)
+         printf("NO\n");
+      else
+         printf("YES\n");
+   }
+   return 0;
+}
+#+end_src
+
+** AC自动机
+- 来源：http://hi.baidu.com/%CE%D2%BF%E0%B0%A155/blog/item/7a96fbf35e7ff3db7831aa5b.html
+#+begin_src cpp
+//
+//来源：http://hi.baidu.com/%CE%D2%BF%E0%B0%A155/blog/item/7a96fbf35e7ff3db7831aa5b.html
+//
+#include<cstdio>
+#include<queue>
+#include<cstring>
+#include<bitset>
+using namespace std;
+const int kind = 26;
+const int maxn = 70000;
+int root,tot;
+char ch[1010];
+int n,m;
+struct Node{
+   int child[kind];
+   int fail;
+   int id;
+   void init(){
+      memset(child,0,sizeof(child));
+      fail = -1 , id = 0;
+   }
+}T[maxn];
+int que[maxn],head,tail;
+void init(){
+   root = tot = 0;
+   T[root].init();
+}
+void insert(char *s,int id){
+   int p = root,index;
+   while(*s){
+      index = *s - 'a';
+      if(!T[p].child[index]){
+         T[++tot].init();
+         T[p].child[index] = tot;
+      }
+      p = T[p].child[index];
+      s++;
+   }
+   T[p].id = id;
+}
+void build_ac_auto(){
+   head = tail = 0;
+   que[tail ++] = root;
+   while(head < tail){
+      int u = que[head++];
+      for(int i = 0 ; i < kind ; i ++){
+         if(T[u].child[i]){
+            int son = T[u].child[i];
+            int p = T[u].fail;
+            if(u == root) T[son].fail = root;
+            else T[son].fail = T[p].child[i];
+            que[tail++] = son;
+         }else{//trie图，设定虚拟节点
+            int p = T[u].fail;
+            if(u == root) T[u].child[i] = root;
+            else T[u].child[i] = T[p].child[i];
+         }
+      }
+   }
+}
+int main(){
+   init();
+   scanf("%d",&n);
+   for(int i = 0 ; i < n ; i ++){
+      scanf("%s",ch);
+      insert(ch,i);
+   }
+   build_ac_auto();
+}
+#+end_src
+
+fail指针原则：fail指针的构造关键是找到即是当点匹配串的后缀，又是trie中一个模式串的前缀的最长的字符串。
+see: http://plussai.iteye.com/blog/1143023
+
+** 字符串最小表示
+- copied from http://whitedeath.is-programmer.com/posts/18404.html
+#+begin_src cpp
+//http://whitedeath.is-programmer.com/posts/18404.html
+//这个是网上最一般的最小表示法代码：
+int MinimumRepresentation(char *s, int len){
+	int i = 0, j = 1, count = 0, t;
+	while(i<len&&j<len&&count<len){
+		if(s[(i+count)%len]==s[(j+count)%len])
+			count++;
+		else{
+			if(s[(i+count)%len]>s[(j+count)%len])
+				i = i+count+1;
+			else
+				j = j+count+1;
+			if(i==j)
+				++j;
+			count = 0;
+		}
+	}
+	return min(i, j);
+}
+
+//首先，求余过程很费时间，尤其是字符串比较长的时候。而且本题中最多是len的2倍，所有变求余为作差；
+//其次，最后的return min(i,j)可以改成直接return i，因为i <= j是肯定的....因为用通俗的说法，每次i都会把j拉到i+1的位置，所以最后，可以在改变i的时候，将j也拖过去....
+//最终代码：
+int MinimumRepresentation(char *s, int len){
+	int i = 0, j = 1, count = 0, t;
+	while(i<len&&j<len&&count<len){
+		int x = i+count;
+		int y = j+count;
+
+		if(x>=len)
+			x -= len; //用减法代替求余 
+		if(y>=len)
+			y -= len; //用减法代替求余
+
+		if(s[x]==s[y])
+			count++;
+		else{
+			if(s[x]>s[y]){
+				i = i+count+1;
+				j = i+1; /*将 j 拖至 i + 1 的地方*/
+			}else
+				j = j+count+1;
+
+			if(i==j)
+				j++;
+			count = 0;
+		}
+	}
+
+	return i; //直接return i即可 
+}
+#+end_src
+
+** Subsequence & Substring 子序列 & 子串 问题
+*** LCPS (Longest Common Palindromic Subsequence) 最长公共回文子序列
+- \(\mathcal{O}(n^4)\)
+#+begin_src cpp
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+using namespace std;
+
+const int MAX_N = 100;
+
+char x[MAX_N];
+char y[MAX_N];
+int lcps[MAX_N][MAX_N][MAX_N][MAX_N];
+
+int LCPSLength(char *x, char *y)
+{
+    int n = strlen(x + 1);
+    int m = strlen(y + 1);
+
+    // cout << endl << n <<  " " << m << endl;
+
+    // memset(lcps, 0, sizeof(lcps));
+    for (int i = 1; i <= n; ++ i)
+        for (int j = i; j <= n; ++ j)
+            for (int k = 1; k <= m; ++ k)
+                for (int l = k; l <= m; ++ l)
+                    if ( (i == j || k == l) &&
+                         (x[i] == y[k] || x[i] == y[l] ||
+                          x[j] == y[k] || x[j] == y[l])
+                        )
+                        lcps[i][j][k][l] = 1;
+                    else
+                        lcps[i][j][k][l] = 0;
+
+    for (int xLength = 2; xLength <= n; ++ xLength)
+        for (int yLength = 2; yLength <= m; ++ yLength)
+            for (int i = 1; i <= n - xLength + 1; ++ i)
+                for (int k = 1; k <= m - yLength + 1; ++ k)
+                {
+                    int j = i + xLength - 1;
+                    int l = k + yLength - 1;
+                    if (x[i] == x[j] && x[j] == y[k] && y[k] == y[l])
+                        lcps[i][j][k][l] = 2 + lcps[i + 1][j - 1][k + 1][l - 1];
+                    else
+                        lcps[i][j][k][l] = max(lcps[i + 1][j][k][l],
+                                               max(lcps[i][j - 1][k][l],
+                                                   max(lcps[i][j][k + 1][l],
+                                                       lcps[i][j][k][l - 1])));
+                }
+
+    // for (int i = 1; i <= n; ++ i) {
+    //     for (int j = 1; j <= n; ++ j) {
+    //         for (int k = 1; k <= m; ++ k) {
+    //             for (int l = 1; l <= m; ++ l) {
+    //                 cout << i << " "<< j << " " << k << " " << l << " " << lcps[i][j][k][l] << endl;
+    //             }
+    //         }
+    //     }
+    // }
+
+    return lcps[1][n][1][m];
+}
+
+int main(int argc, char *argv[])
+{
+    int t;
+    cin >> t;
+    for (int cas = 1; cas <= t; ++ cas)
+    {
+        cin >> x + 1 >> y + 1;
+        cout << "Case " << cas << ": ";
+        cout << LCPSLength(x, y) << endl;
+    }
+    return 0;
+}
+#+end_src
++ [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3917][UVA/12473 - Common Palindrome]]
+*** LIS (Longest Increasing Subsequence) 最长上升（不降）子序列
+- \(\mathcal{O}(n\log{n})\) 算法
+#+begin_src cpp
+#define _cp(a,b) ((a)<(b))
+
+const int MAX_N = 100000 + 10;
+
+int f[MAX_N];
+
+int lis(int s[], int n)//单调不降子序列nlogn算法
+{
+	int l, r, mid, len = 1;
+	f[1] = s[1];
+	for(int i = 2; i<=n; i++){
+		l = 1, r = len;
+		if(_cp(f[len],s[i])){
+			f[++len] = s[i];
+			continue;
+		}
+		while(l<=r){
+			mid = (l+r)>>1;
+			if(_cp(f[mid],s[i]))
+				l = mid+1;//不降
+			else
+				r = mid-1;//二分查找
+		}
+		f[l] = s[i];//插入
+		if(l>len)
+			len++;//增加长度
+	}
+	return len;
+}
+#+end_src
+- usaco 4.3（经典LIS模板）
+#+begin_src cpp
+/* 
+   ID: majunch2
+   LANG: C++
+   PROG: buylow
+*/
+//usaco 4.3
+//很经典的O(nlogn)LIS问题，还可以求序列方案数
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+//#include <cmath>
+#include <algorithm>
+//#include <ctime>
+using  namespace std;
+const double inf = 1e15;
+
+int p[5010],f[5010];  //p[i]为值，f[i]为以第i元素为末元素的最长上升子序列长度
+int best[5010];  //best[i]表示长度为i的序列的当前最小末元素
+int num[5010];   //num[i]表示以第i元素为末元素的最长上升子序列方案数
+
+int find(int l,int r,int key)
+{
+	int mid;
+	while (1)
+	{
+		mid=(l+r)>>1;
+		if (best[mid]<key && key<=best[mid+1])
+			return mid+1;
+		if (best[mid-1]<key && key<=best[mid])
+			return mid;
+		if ( key<best[mid] )
+			r=mid-1;
+		else l=mid+1;
+	}
+}
+
+
+
+int main()
+{
+	//freopen("buylow.in","r",stdin);
+	//freopen("buylow.out","w",stdout);
+	int n;
+	scanf("%d",&n);
+	for (int i=n;i>=1;i--)
+		scanf("%d",&p[i]);
+	memset(best,-1,sizeof(best));
+	int k;
+	int ans=1;
+	best[1]=p[1];f[1]=1;
+	for (int i=2;i<=n;i++)
+	{
+		if (p[i]<=best[1]) k=1;  //这里寻k值要很小心，不然容易死循环
+		else if (p[i]>best[ans]) k=++ans;
+		else k=find(1,ans,p[i]);
+
+		best[k]=p[i];
+		f[i]=k;
+	}
+	printf("%d ",ans);
+	
+    //如果相同的序列只能算一种方案，那需要判重，最简单的就是用bool数组了，但由于序列的特性，这里只使用now同样可以
+	for (int i=1;i<=n;i++)
+	{
+		if (f[i]==1) { num[i][0]=num[i][1]=1; continue; }
+		int now=-1;
+	    for (int j=i-1;j>=1;j--)
+	       if (f[j]+1==f[i] && p[j]<p[i] && now!=p[j])
+		   {
+			   num[i]+=num[j];
+			   now=p[j];        //这里值得思考一下，很简单，对于符合条件的
+		   }                    //重复的两个数（假设为p[i1]=p[i2])肯定是连续枚举的，因为如果中
+	}                      //还枚举了其他数(假设有p[j])那会矛盾。
+			//若p[j]>p[i1],就有f[j]至少为f[i1]+1，不符合枚举条件；
+			//若p[j]<p[i1],就有f[i2]至少为f[j]+1,这样p[i2]不会枚举到，矛盾。
+   
+	int now=-1;
+	int sum=0;
+	for (int i=1;i<=n;i++)
+		if (f[i]==ans && now!=p[i])
+		{
+			sum+=num[i];
+			now=p[i];
+		}
+	printf("%d/n",sum);
+
+
+	return 0;
+}
+#+end_src
+- \(\mathcal{O}(n^2)\) 算法
+#+begin_src cpp
+int Longest_Increasing(int num[], int n){
+	int lis[n], i, j;
+	for(i = 0; i<n; i++){
+		lis[i] = 1;
+		for(j = 0; j<i; j++)
+			if(num[i]>num[j]&&lis[j]+1>lis[i])
+				lis[i] = lis[j]+1;
+	}
+	int maxn = 0;
+	for(i = 0; i<n; i++)
+		if(maxn<lis[i])
+			maxn = lis[i];
+	return maxn;
+}
+#+end_src
+- 求长度为最长上升子序列的序列个数
+#+begin_src cpp
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <string>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int b[100005], p[100005];
+int n, a[100005];
+void fun() //传入n个数,a[]
+{
+   memset( p, 0, sizeof(p) );
+   b[1]=a[0];
+   int i;
+   int begine=1,end=1;
+   for(i=1;i<n;i++)
+   {
+      if(a[i]>b[end])
+         b[++end]=a[i];
+      else
+      {
+         int x=begine,y=end;
+         while(x<y)
+         {
+            int mid=(x+y)/2;
+            if(b[mid]>=a[i])
+               y=mid;
+            else
+               x=mid+1;
+         }
+         b[y]=a[i];
+         if ( p[y-1]>0 || y == 1 )
+            ++ p[y];
+      }
+   }
+   //   for ( int i=1; i<=end; i++ ){
+   //      printf( " %d", p[i] );
+   //   }
+   //   printf( "\n" );
+   printf("%d\n%d\n",end, p[end]+1); //输出最长上升子序列的长度
+
+}
+
+int main() {
+   while ( scanf( "%d", &n ) != EOF ) {
+      for ( int i=0; i<n; i++ ){
+         scanf( "%d", &a[i] );
+      }
+      fun( );
+   }
+   return 0;
+}
+#+end_src
+
+*** LPS (Longest Palindromic Substring) 最长回文子串
+- Manacher
+#+begin_src cpp
+/*str是这样一个字符串（下标从1开始）：
+  举例：若原字符串为"abcd"，则str为"$#a#b#c#d#"，最后还有一个终止符。
+  n为str的长度，若原字符串长度为nn，则n=2*nn+2。
+  rad[i]表示回文的半径，即最大的j满足str[i-j+1...i] = str[i+1...i+j]，
+  而rad[i]-1即为以str[i]为中心的回文子串在原串中的长度*/
+
+#define MAXN 100001
+char str[2*MAXN];
+int rad[2*MAXN];
+int Manacher(char *s)
+{
+    int i,mx = 0,id,len,n,ans=0;
+    len = strlen(s);
+    n = len*2+2;
+    str[0] = '$';
+    for(i=0;i<=len;i++){
+        str[i*2+1] = '#';
+        str[i*2+2] = s[i];
+    }
+    for(i=1; i<n; i++)
+    {
+        if( mx > i )
+            rad[i] = rad[2*id-i]<mx-i?rad[2*id-i]:mx-i; 
+        else
+            rad[i] = 1;
+        for(; str[i+rad[i]] == str[i-rad[i]]; rad[i]++)
+            ;
+        if( rad[i] + i > mx )
+        {
+            mx = rad[i] + i;
+            id = i;
+        }
+    }
+    for(i=0;i<n;i++)
+        ans=rad[i]>ans?rad[i]:ans;
+    return ans;
+}
+#+end_src
+
+* Range Query Algorithm 区间查询算法
+** Segment Tree 线段树
+- 浙大模板注解：
+#+begin_src cpp
+//线段树的应用：
+//1）求面积：
+//一.坐标离散化；
+//二.垂直边按x坐标排序；
+//三.从左往右用线段树处理垂直边，累计每个离散x区间长度和线段树长度的乘积。
+//2）求周长：
+//一.坐标离散化；
+//二.垂直边按x坐标排序，第二关键字为入边优于出边；
+//三.从左往右用线段树处理垂直边，在每个离散点上先加入所有入边，累计线段树长度变化值，再删除所有出边，累计线段树长度变化值；
+//四.水平边按y坐标排序，第二关键字为入边优于出边；
+//五.从上往下用线段树处理水平边，在每个离散点上先加入所有入边，累计线段树长度变化值，再删除所有出边，累计线段树长度变化值。
+//
+//基本线段树代码：
+//基本线段树，可以处理加入边和删除边不同的情况
+//t是传入的线段树的根节点
+//l0, r0是传入的线段树的节点范围
+//l，r是线段树中的一个区间的两个端点
+#define MAXN 10000
+
+struct segtree{
+	int n;
+	int cnt[MAXN]; //覆盖这一节点区间的线段的个数
+	int len[MAXN]; //区间的长度
+	segtree(int t) :n(t){
+		for(int i = 1; i<=t; i++) //初始化数组
+			cnt[i] = len[i] = 0;
+	};
+
+	//成员函数啦
+	void update(int t, int l, int r); //更新以t为根节点的线段树的区间长度len[t]
+	void inc_seg(int t, int l0, int r0, int l, int r); //加入边
+	void dec_seg(int t, int l0, int r0, int l, int r); //删除边
+	int seg_len(int t, int l0, int r0, int l, int r); //求线段树的长度
+};
+
+//区间(l, r)的长度
+int length(int l, int r){
+	return (r-l);
+}
+
+//更新以t为根节点的线段树的区间长度len[t]
+void segtree::update(int t, int l, int r){
+	if(cnt[t]||(r-l)==1)
+		len[t] = length(l, r);
+	else
+		len[t] = len[t+t]+len[t+t+1]; //左右子树区间长度之和
+}
+
+//向以t为根节点、区间为(l0, r0)的线段树中加入区间(l, r)
+void segtree::inc_seg(int t, int l0, int r0, int l, int r){
+	if(l0==l&&r0==r){
+		cnt[t]++;
+	}else{
+		int m0 = (l0+r0)>>1; //即(l0+r0)/2
+		if(l<m0) //覆盖到左孩子区间
+		{
+			//向左孩子区间插入(l, r)
+			inc_seg(t+t, l0, m0, l, m0<r ? m0 : r);
+		}
+		if(r>m0) //覆盖到右孩子区间
+		{
+			//向右孩子区间插入(l, r)
+			inc_seg(t+t+1, m0, r0, m0>l ? m0 : l, r);
+		}
+		if(cnt[t+t]&&cnt[t+t+1]){
+			cnt[t+t]--;
+			update(t+t, l0, m0);
+			cnt[t+t+1]--;
+			update(t+t+1, m0, r0);
+			cnt[t]++;
+		}
+	}
+	update(t, l0, r0);
+}
+
+//向以t为根节点、区间为(l0, r0)的线段树中删除区间(l, r)
+void segtree::dec_seg(int t, int l0, int r0, int l, int r){
+	if(l0==l&&r0==r)
+		cnt[t]--;
+	else if(cnt[t]){
+		cnt[t]--;
+		if(l>l0)
+			inc_seg(t, l0, r0, l0, l); //抵消上面的cnt[t]--
+		if(r<r0)
+			inc_seg(t, l0, r0, r, r0); //同上
+	}else{
+		int m0 = (l0+r0)>>1;
+		if(l<m0)
+			dec_seg(t+t, l0, m0, l, m0<r ? m0 : r);
+		if(r>m0)
+			dec_seg(t+t+1, m0, r0, m0>l ? m0 : l, r);
+	}
+	update(t, l0, r0);
+}
+
+//求线段树中区间(l, r)的区间长度，(l0, r0)是线段树的初始节点区间
+int segtree::seg_len(int t, int l0, int r0, int l, int r){
+	if(cnt[t]||(l0==l&&r0==r))
+		return len[t];
+	else{
+		int m0 = (l0+r0)>>1;
+		int ret = 0;
+		if(l<m0)
+			ret += seg_len(t+t, l0, m0, l, m0<r ? m0 : r);
+		if(r>m0)
+			ret += seg_len(t+t+1, m0, r0, l, m0>l ? m0 : l, r);
+
+		return ret;
+	}
+}
+
+//线段树的扩展代码如下：
+//线段树扩展，可以计算长度和线段树
+//可以处理加入边和删除边不同的情况
+//t是传入的线段树的根节点
+//l0, r0是传入的线段树的节点范围
+//l，r是线段树中的一个区间的两个端点
+#define MAXN 10000
+
+struct segtree{
+	int n;
+	int cnt[MAXN]; //覆盖这一节点区间的线段的个数
+	int len[MAXN]; //区间的长度
+	int cut[MAXN]; //存放线段数
+	int bl[MAXN]; //标识左端点是否被区间覆盖到
+	int br[MAXN]; //标识右端点是否被区间覆盖到
+	segtree(int t) :
+		n(t){
+		for(int i = 1; i<=t; i++) //初始化数组
+			cnt[i] = len[i] = cut[i] = bl[i] = br[i] = 0;
+	}
+	;
+
+	//函数啦
+	void update(int t, int l, int r); //更新以t为根节点的线段树的区间长度len[t]
+	void inc_seg(int t, int l0, int r0, int l, int r); //加入边
+	void dec_seg(int t, int l0, int r0, int l, int r); //删除边
+	int seg_len(int t, int l0, int r0, int l, int r); //求区间的长度
+	int seg_cut(int t, int l0, int r0, int l, int r); //求线段数
+};
+
+int length(int l, int r){
+	return (r-l);
+}
+//更新以t为根节点、区间为[l, r]的线段树的区间长度len[t]
+//和线段数cut[t]及其左右端点标识bl[t]和br[t]
+void segtree::update(int t, int l, int r){
+	if(cnt[t]||(r-l)==1){
+		len[t] = length(l, r);
+		cut[t] = bl[t] = br[t] = 1;
+	}else{
+		len[t] = len[t+t]+len[t+t+1]; //左右子树长度之和
+		cut[t] = cut[t+t]+cut[t+t+1];
+		if(br[t+t]&&bl[t+t+1])
+			cut[t]--;
+		bl[t] = bl[t+t];
+		br[t] = br[t+t+1];
+	}
+}
+//向以t为根节点、区间为(l0, r0)的线段树中加入区间(l, r)
+void segtree::inc_seg(int t, int l0, int r0, int l, int r){
+	if(l0==l&&r0==r){
+		cnt[t]++;
+	}else{
+		int m0 = (l0+r0)>>1; //即(l0+r0)/2
+
+		if(l<m0) //覆盖到左孩子区间
+		{
+			//向左孩子区间插入(l, r)
+			inc_seg(t+t, l0, m0, l, m0<r ? m0 : r);
+		}
+
+		if(r>m0) //覆盖到右孩子区间
+		{
+			//向右孩子区间插入(l, r)
+			inc_seg(t+t+1, m0, r0, m0>l ? m0 : l, r);
+		}
+
+		if(cnt[t+t]&&cnt[t+t+1]){
+			cnt[t+t]--;
+			update(t+t, l0, m0);
+			cnt[t+t+1]--;
+			update(t+t+1, m0, r0);
+			cnt[t]++;
+		}
+	}
+	update(t, l0, r0);
+}
+//向以t为根节点、区间为(l0, r0)的线段树中删除区间(l, r)
+void segtree::dec_seg(int t, int l0, int r0, int l, int r){
+	if(l0==l&&r0==r)
+		cnt[t]--;
+	else if(cnt[t]){
+		cnt[t]--;
+		if(l>l0)
+			inc_seg(t, l0, r0, l0, l); //抵消上面的cnt[t]--
+		if(r<r0)
+			inc_seg(t, l0, r0, r, r0); //同上
+	}else{
+		int m0 = (l0+r0)>>1;
+		if(l<m0)
+			dec_seg(t+t, l0, m0, l, m0<r ? m0 : r);
+		if(r>m0)
+			dec_seg(t+t+1, m0, r0, m0>l ? m0 : l, r);
+	}
+	update(t, l0, r0);
+}
+//求线段树中区间(l, r)的区间长度，(l0, r0)是线段树的初始节点区间
+int segtree::seg_len(int t, int l0, int r0, int l, int r){
+	if(cnt[t]||(l0==l&&r0==r))
+		return len[t];
+	else{
+		int m0 = (l0+r0)>>1;
+		int ret = 0;
+		if(l<m0)
+			ret += seg_len(t+t, l0, m0, l, m0<r ? m0 : r);
+		if(r>m0)
+			ret += seg_len(t+t+1, m0, r0, l, m0>l ? m0 : l, r);
+
+		return ret;
+	}
+}
+
+//求线段树中区间(l, r)的连续线段数，(l0, r0)是线段树的初始节点区间
+int segtree::seg_cut(int t, int l0, int r0, int l, int r){
+	if(cnt[t])
+		return 1;
+	if(l0==l&&r0==r)
+		return cut[t];
+	else{
+		int m0 = (l0+r0)>>1;
+		int ret = 0;
+		if(l<m0){
+			ret += seg_cut(t+t, l0, m0, l, m0<r ? m0 : r);
+		}
+		if(r>m0){
+			ret += seg_cut(t+t+1, m0, r0, m0>l ? m0 : l, r);
+		}
+		if(l<m0&&r>m0&&br[t+t]&&bl[t+t+1])
+			ret--;
+		return ret;
+	}
+}
+#+end_src
+
+** Fenwick Tree (Binary Indexed Tree) 树状数组
+- 一维
+#+begin_src cpp
+#define MAXN 10000
+
+int lowbit(int i){
+	return i&(-i);
+}
+
+void add(int i, int v){
+	while(i<=MAXN){
+		a[i]+=v;
+		i+=lowbit(i);
+	}
+}
+
+int sum(int i){
+	int s=0;
+	while(i>0){
+		s+=a[i];
+		i-=lowbit(i);
+	}
+	return s;
+}
+#+end_src
+
+- 二维
+#+begin_src cpp
+#define MAXN 1000+10
+
+int a[MAXN][MAXN];
+
+int Lowbit(int m){
+	return m&(-m);
+}
+
+int Getsum(int x,int y){
+	int tempy,sum=0;
+	while(x>0){
+		tempy = y;
+		while(tempy>0){
+			sum += a[x][tempy];
+			tempy -= Lowbit(tempy);
+		}
+		x -= Lowbit(x);
+	}
+	return sum;
+}
+
+void Inc(int x,int y,int Delta,int MaxNum){
+	int tempy;
+	while(x<=MaxNum){
+		tempy = y;
+		while(tempy<=MaxNum){
+			a[x][tempy] += Delta;
+			tempy += Lowbit(tempy);
+		}
+		x += Lowbit(x);
+	}
+}
+#+end_src
+
+** RMQ-LCA
+** TODO RMQ-ST
+- copied from: http://www.cppblog.com/acmiyou/archive/2009/05/18/83278.aspx
+#+begin_src cpp
+// http://www.cppblog.com/acmiyou/archive/2009/05/18/83278.aspx
+
+#include<iostream>
+#include<cmath>
+#include<algorithm>
+using namespace std;
+#define M 100010
+#define MAXN 500
+#define MAXM 500
+int dp[M][18];
+int dp2[MAXN][MAXM][10][10]
+/*
+ *一维RMQ ST算法
+ *构造RMQ数组 makermq(int n,int b[]) O(nlog(n))的算法复杂度
+ *dp[i]j] 表示从i到i+2^j -1中最大的一个值
+ *dp[i][j]=max{dp[i][j-1],dp[i+2^(j-1)][j-1]}
+ *查询RMQ rmq(int s,int v)
+ *将s ->v 分成两个2^k的区间
+ *即 k=(int)log2(s-v+1)
+ *查询结果应该为 max(dp[s][k],dp[v-2^k+1][k])
+ */
+int rmq(int s,int v)
+{
+    int k=(int)(log((v-s+1)*1.0)/log(2.0));
+    return max(dp[s][k],dp[v-(1<<k)+1][k]);
+}
+void makermq(int n,int b[])
+{
+    int i,j;
+    for(i=1;i<=n;i++)
+        dp[i][0]=b[i];
+    for(j=1;(1<<j)<=n;j++)
+        for(i=1;i+(1<<j)-1<=n;i++)
+            dp[i][j]=max(dp[i][j-1],dp[i+(1<<(j-1))][j-1]);
+}
+
+/*
+ *二维RMQ ST算法
+ *构造RMQ数组 makermq(int n,int m,int b[][]) O(n*m*log(n)*log(m))算法复杂度
+ *dp2[row][col][i][j] 表示 行从row ->row +2^i-1 列从col ->col +2^j-1 二维区间里最大值
+ *dp2[row][col][i][j] = 下行
+ *max{dp2[row][col][i][j-1],dp2[row][col][i-1][j],dp2[row][col+2^(j-1)][i][j-1],dp2[row+2^(i-1)][col][i-1][j]}
+ *查询RMQ rmq(int sx,int ex,int sy,int ey)
+ *同一维的将sx->ex 分为两个2^kx区间 将 sy->ey分为两个2^ky的区间
+ *kx=(int)log2(ex-sx+1) ky=(int)log2(ey-sy+1)
+ *查询结果为
+ *max{dp2[sx][sy][kx][ky],dp2[sx][ey-2^ky+1][kx][ky],dp2[ex-2^kx+1][sy][kx][ky],dp2[ex-2^kx+1][ey-2^ky+1][kx][ky]}
+ */
+
+void makermq(int n,int m,int b[][MAXM])
+{
+    int row,col,i,j;
+    for(row=1;row<=n;row++)
+        for(col=1;col<=m;col++)
+            dp2[row][col][0][0]=b[row][col];
+    for(i=0;(1<<i)<=n;i++)
+        for(j=0;(1<<j)<=m;j++)
+        {
+            if(i==0&&j==0) continue;
+            for(row=1;row+(1<<i)-1<=n;row++)
+                for(col=1;col+(1<<j)-1<=m;col++)
+                {
+                    if(i==0)
+                        dp2[row][col][i][j]=max(dp2[row][col][i][j-1],dp2[row][col+(1<<(j-1))][i][j-1]);
+                    else
+                        dp2[row][col][i][j]=max(dp2[row][col][i-1][j],dp2[row+(1<<(i-1))][col][i-1][j]);
+                }
+        }
+}
+int rmq(int sx,int ex,int sy,int ey)
+{
+    int kx=(int)(log((ex-sx+1)*1.0)/log(2.0)),ky=(int)(log((ey-sy+1)*1.0)/log(2.0));
+    return max(max(dp2[sx][sy][kx][ky],dp2[sx][ey-(1<<ky)+1][kx][ky]),max(dp2[ex-(1<<kx)+1][sy][kx][ky],dp2[ex-(1<<kx)+1][ey-(1<<ky)+1][kx][ky]));
+}
+#+end_src
+
+* Graph Theory 图论
+汇总 http://hi.baidu.com/fpkelejggfbfimd/item/719a871d71bac60fe75c3600
+** 二分图匹配
+*** hungary 匈牙利算法
+- 浙大模板注解：
+#+begin_src cpp
+#include <string.h>
+#define MAXN 310
+#define _clr(x) memset(x,0xff,sizeof(int)*MAXN)
+
+int hungary(int m, int n, int mat[][MAXN], int* match1, int* match2){
+	int s[MAXN];//s表示交错路中在x集合中的点
+	int t[MAXN];
+	int p;//
+	int q;//q表示一条交错路中x集合的点的个数
+	int ret = 0, i, j, k;
+	_clr(match1), _clr(match2);//清空匹配
+	for(i = 0; i<m; i++){
+		if(match1[i]<0)
+		{//i如果是未盖点
+			s[0] = i;//则交错路第一个点是从x集合中的i出发的
+			p = q = 0;//初始交错路
+			_clr(t);
+			for(; p<=q; p++)
+			{
+				if(match1[i]>=0)
+					break;//一旦找到增广路则i有所匹配，不是未盖点，循环结束
+
+				k = s[p];//k是x集合中第p个未盖点
+				for(j = 0; j<n; j++)
+				{//j为y集合中的点
+					if(match1[i]>=0)
+						break;//一旦找到增广路则i有所匹配，不是未盖点，循环结束
+
+					if(mat[k][j]&&t[j]<0)
+					{//k这个未盖点  到 j 有路 并且 j没有走过
+						s[++q] = match2[j], t[j] = k;//交错路加长，
+						//加长的点是是x集合中，和j匹配的点
+
+						if(s[q]<0)//如果没有和j匹配的点
+						{//则j是未盖点则交错路为可增广路，匹配增大
+							for(p = j; p>=0;)
+							{//相当于回溯
+								k = t[j];//k为从增广路走到j的点(x集合中)
+								//将j与k匹配
+								match2[j] = k;
+								//p为临时量保存曾经和k匹配的点(在增广路中较k之前的点)
+								p = match1[k];
+								match1[k]=j;
+								j = p;//就是将match1[k]与j交换位置，
+								//将继续寻找增广路中之前点的状态转移到前面
+							}
+						}
+					}
+				}
+			}
+		}
+		if(match1[i]>0)
+			ret++;
+	}
+	return ret;
+}
+#+end_src
+
+* bit-mask 状态压缩
+* Hash 哈希
+- poj3349(哈希，最小表示):
+#+begin_src cpp
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+using namespace std;
+#define PRI_NUM 149997
+struct node{
+	int length[12];
+	int next;
+} snow_hash[PRI_NUM+100000+50];
+int hash_index;
+int temp[12], temp2[12];
+bool check(int a, int* snow)//基于最小表示法写的匹配函数
+{
+	int index1 = 0, index2 = 0, i;
+	while(index1<6&&index2<6){
+		i = 0;
+		while(snow[index1+i]==snow_hash[a].length[index2+i])
+			i++;
+		if(i>=6)
+			return true;
+		if(snow[index1+i]>snow_hash[a].length[index2+i])
+			index1 += i+1;
+		else
+			index2 += i+1;
+	}
+	return false;
+}
+bool insert(int num){
+	int i = num;
+	while(snow_hash[i].next){
+		if(check(snow_hash[i].next, temp)||check(snow_hash[i].next, temp2))
+			return true;
+		i = snow_hash[i].next;
+	}
+	snow_hash[i].next = hash_index;
+	for(int j = 0; j<12; j++){
+		snow_hash[hash_index].length[j] = temp[j];
+	}
+	hash_index++;
+	return false;
+}
+int main(){
+	memset(snow_hash, 0, sizeof(snow_hash));
+	hash_index = PRI_NUM;
+	int n, sum;
+	bool flag = false;
+	scanf("%d", &n);
+	for(int i = 0; i<n; i++){
+		sum = 0;
+		int x;
+		for(int j = 0; j<6; j++){
+			scanf("%d", &x);
+			temp[6+j] = temp2[5-j] = temp2[11-j] = temp[j] = x;
+			sum += temp[j];
+		}
+		if(flag = insert((sum)%PRI_NUM))
+			break;
+	}
+	if(flag)
+		printf("Twin snowflakes found.\n");
+	else
+		printf("No two snowflakes are alike.\n");
+	return 0;
+}
+#+end_src
+
+* 优化
+** 单调优化
+*** stack 栈
++ [[http://www.spoj.pl/problems/CITY2/][SPOJ/CITY2 - A Famous City]]
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4328][HDU/4328 - Cut the cake]]
++ [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3925][UVA/12481 - K-Neutral Rectangles]] ***TODO
+
+** RMQ-ST 优化
+
+* DLX 跳舞链
+- [[http://poj.org/problem?id=3074][POJ/3074 - Sudoku]]，[[http://www.cnblogs.com/AndreMouche/archive/2011/02/24/1964136.html][学姐的博客]]
+#+begin_src cpp
+#include<stdio.h>
+#include<string.h>
+
+
+const int MAX_COLOUMN = 81+9*9+9*9+9*9+2;//最多出现列数
+const int MAX_ROW = 81*9+2;//最多出现的列数
+
+
+int cnt[MAX_COLOUMN];//cnt[i]统计第i列1的个数
+int most,coloumn;
+bool ans[MAX_ROW];//ans存放最终选中的行
+
+
+//跳舞链中的节点
+struct Point
+{
+    int up,down,left,right;//上，下，左，右
+    int coloumn;//该点所在的列标
+    int row;//行标
+} node[MAX_ROW*MAX_COLOUMN+MAX_COLOUMN];
+
+
+//初始化跳舞链信息为空
+void init(int m)
+{
+    int i;
+    for(i=0;i<=m;i++)
+    {
+        node[i].down=i;
+        node[i].up = i;
+        node[i].coloumn=i;
+        node[i].left=i-1;
+        node[i].right=i+1;
+        cnt[i]=0;
+    }
+    node[0].left = m;
+    node[m].right = 0;
+}
+
+
+void remove(int c)//删除c列上所有1元素所在的行
+{
+    node[node[c].right].left=node[c].left;
+    node[node[c].left].right=node[c].right;
+    int t,tt;
+    for(t=node[c].down;t!=c;t=node[t].down)//从上到下从左到右删除该列上的每一非零元素所在行信息
+    {
+        for(tt = node[t].right;tt!=t;tt=node[tt].right)//删除非零元素所在行
+        {
+            cnt[node[tt].coloumn]--;
+            node[node[tt].down].up = node[tt].up;
+            node[node[tt].up].down = node[tt].down;
+        }
+    }
+}
+
+
+void resume(int c)//还原c列上所有1元素所在的行
+{
+    int t,tt;
+    for(t=node[c].up;t!=c;t=node[t].up)//从下往上从左到右还原该c列中1所在的行信息
+    {
+        for(tt=node[t].left;tt!=t;tt=node[tt].left)
+        {
+            cnt[node[tt].coloumn]++;
+            node[node[tt].up].down=tt;
+            node[node[tt].down].up=tt;
+        }
+    }
+
+    node[node[c].right].left=c;
+    node[node[c].left].right=c;
+}
+
+
+bool dfs(int k)//k为已经选中的行的数目
+{
+    int i,j;
+    if(k>=most)return false;
+    if(node[coloumn].right == coloumn)//当前跳舞链已为空
+    {
+        if(k<most)
+            most = k;
+        return true;
+    }
+ 
+    int t = coloumn+1;
+    int c;
+    //选取当前矩阵中1最少的列
+    for(i=node[coloumn].right;i!=coloumn;i=node[i].right)
+    {
+        if(cnt[i]<t)
+        {
+            c=i;t=cnt[i];
+            if(t==1)break;
+        }
+    }
+
+    remove(c);//删除列c中所有1所在的行
+
+    //删除时从左到右从上到下，还原时从下到上，从右到左
+    for(i = node[c].down;i!=c;i=node[i].down)
+    {
+        for(j=node[i].right;j!=i;j=node[j].right)
+        {
+            remove(node[j].coloumn);
+        }
+        ans[node[j].row]=true;
+        if(dfs(k+1))
+        {
+            return true;
+        }
+        ans[node[j].row]=false;
+        for(j=node[j].left;j!=i;j=node[j].left)
+        {
+            resume(node[j].coloumn);
+        }
+
+  
+    }
+
+    resume(c);
+    return false;
+}
+
+
+bool graph[MAX_ROW][MAX_COLOUMN];
+void addrow(int i,int j,int k)
+{
+    int curr = (i*9+j)*9+k;
+    graph[curr][(i*9+j)]=true;
+    graph[curr][81+i*9+k]=true;
+    graph[curr][81+81+j*9+k]=true;
+    int tr = i/3;
+    int tc = j/3;
+    graph[curr][81+81+81+(tr*3+tc)*9+k]=true;
+}
+ 
+char str[MAX_ROW];
+int main()
+{
+    int N,M,i,j,k;
+    while(scanf("%s",str)!=EOF)
+    {
+        if(strcmp(str,"end")==0)break;
+        N=81*9;
+        M = 9*9+9*9+9*9+9*9;
+        coloumn = M;
+        int cur=coloumn+1;//当前节点编号
+        init(coloumn);
+        memset(graph,0,sizeof(graph));
+        for(i=0;i<9;i++)
+            for(j=0;j<9;j++)
+            {
+                if(str[i*9+j]=='.')
+                {
+                    for(k=0;k<9;k++)//遍历每一种颜色
+                    {
+                        addrow(i,j,k);
+                    }
+                    continue;
+                }
+                k = str[i*9+j]-'1';
+                addrow(i,j,k);
+            }
+        for(i=0;i<N;i++)
+        {
+            int start = cur;//记录第i列的开始点编号
+            int pre = cur;//记录该列中当前1的左边第一个1编号
+            for(j=0;j<M;j++)
+            {
+                // scanf("%d",&n);
+                if(graph[i][j])//跳舞链中仅插入非0元素
+                {
+                    int pos = j;
+                    node[cur].up = node[pos].up;
+                    node[node[pos].up].down = cur;
+                    node[cur].down = pos;
+                    node[pos].up = cur;
+                    cnt[pos]++;//该列1的个数+1
+                    node[cur].coloumn = pos;
+                    node[cur].left = pre;
+                    node[pre].right = cur;
+                    node[cur].right = start;
+                    node[start].left=cur;
+                    node[cur].row = i;
+                    pre=cur++;
+                }
+            }
+        }
+ 
+  
+        most = N+1;//记录最少需要选中的行数
+        memset(ans,false,sizeof(ans));
+        dfs(0);
+        // printf("Yes, I found it\n");
+        for(i=0;i<81;i++)
+            for(j=0;j<9;j++)
+                if(ans[i*9+j])
+                {
+                    printf("%d",j+1);
+                    break;
+                }
+ 
+        printf("\n");
+  
+    }
+    return 0;
+}
+#+end_src
+
+* pack 背包
+#+begin_src cpp
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <iostream>
+using namespace std;
+
+#define _max(a,b) ((a)>(b)?(a):(b))
+
+const int MAX_V = 200000;
+
+int f[MAX_V+10], V;
+void ZeroOnePack( int cost, int weight )
+{
+   for ( int v=V; v >= cost; -- v )
+      f[v] = _max( f[v], f[v-cost] + weight );
+}
+void CompletePack( int cost, int weight )
+{
+   for ( int v=cost; v <= V; ++ v )
+      f[v] = _max( f[v], f[v-cost] + weight );
+}
+void MultiplePack( int cost, int weight, int amount )
+{
+   if ( cost*amount >= V )
+      CompletePack( cost, weight );
+   else
+   {
+      int k = 1;
+      while ( k < amount )
+      {
+         ZeroOnePack( k*cost, k*weight );
+         amount = amount - k;
+         k = k * 2;
+      }
+      ZeroOnePack( amount*cost, amount*weight );
+   }
+}
+#+end_src
+
+* Coding Skills
+** 数组模拟链表
+#+begin_src cpp
+// edge-vertex.cpp --- 数组模拟链表
+// 
+// Author: n4k0master
+// Mail: nesuadark@gmail.com
+// 
+// Created: Wed Jul 25 09:53:00 2012 (+0800)
+// Last-Updated: Wed Jul 25 09:53:36 2012 (+0800)
+// 
+// 
+
+// Code:
+
+
+const int MAX_VETX = 100 + 10;
+const int MAX_EDGE = 300 + 10;
+
+
+struct edge {int to, next;} E[MAX_EDGE];
+// must initialize head to -1
+int n, m, head[MAX_VETX];
+
+// Insert the i-th edge from `u' to `v'.
+//              head[u] == next1 -> next2 -> ...
+//  E[i].next = head[u] ...
+//                 E[i] -> next1 -> next2 -> ...
+//   head[u] = i = E[i] ...
+//       head[u] = E[i] -> next1 -> next2 -> ...
+//                  |
+//                  V
+//             (E[i].to = v)
+void insert_direct_edge(int i, int u, int v)
+{
+    E[i].to   = v;
+    E[i].next = head[u];
+    head[u]   = i;
+}
+
+void Usage(int u)
+{
+    for (int i = head[u]; i != -1; i = E[i].next)
+    {
+        // E[i].to is u's son
+        // do some thing
+    }
+}
+
+// 
+// edge-vertex.cpp ends here
+#+end_src
+
+** 输入处理
+uva11827
+#+begin_src cpp
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int gcd(int a, int b) {
+	return b?gcd(b,a%b):a;
+}
+
+int main()
+{
+	string s;
+	getline(cin, s);
+	stringstream ss(s);
+	int t;
+	int a[111];
+	ss >> t;
+	while (t --)
+	{
+		string str;
+		getline(cin, str);
+		stringstream sin(str);
+		int n = 0;
+		while ( sin >> a[n] ) n ++;
+
+		//for (int i = 0; i < n; i ++)
+			//cout << a[i] << " ";
+		//cout << endl;
+
+		int ans = 1;
+		for (int i = 0; i < n; i ++)
+			for (int j = i + 1; j < n; j ++)
+				ans = max(ans, gcd(a[i],a[j]));
+
+		cout << ans << endl;
+	}
+}
+#+end_src
