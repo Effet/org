@@ -1138,219 +1138,134 @@ int main()
 - 例题：poj2406
 *** 扩展KMP
 
-** trie 字典树
-- 例题：poj3630
-#+begin_src cpp
-/*
- * Problem name: Phone List
- *  Solved when: 2011-7-6
- *       Author: nesua
- *  Description: 给一个电话列表，如果没有一个电话号码是另一个的前缀，
- *  那么称这个电话列表的每个号码都是可拨的的。
- *  比如一个电话列表:
- *  	Emergency 911
- *  	Alice 97625999
- *  	Bob 91125426
- *  在这个情况下，就不可能给Bob打电话，因为，当按到911时就直接接通Emergency了。
- *  问，给你一个电话列表，确定它是否每个号码都可拨的。
- *
- *      解题思路: 可用字典树求解。
- *      而在电话号码按字典序排列的前提下，可推得：
- *      如果一个号码是另个号码的前缀，那么这个前缀必然出现在此号码之前且他们相邻，
- *      也即是若一个号码的前一个号码不是此号码的前缀，那么电话列表中不存在此号码的前缀。
- *      故将电话号码字典序排列后，比较两相邻电话号码即可。
- *
- *      难易程度: ★★★☆
- */
+** Trie Tree
+#+BEGIN_SRC cpp
+#define MAX 100000
+#define KIND 26
+#define getID(ch) int((ch)-'a')
+#define new_trie() &(T[cnt_trie++]=Trie())
+#define init_trie() cnt_trie=0,root=new_trie()
+int cnt_trie;
 
+struct Trie {
+    Trie *next[KIND];
+    int state;
+    
+    Trie() {
+        state = 0;
+        for (int i=KIND-1; ~i; --i)
+            next[i] = NULL;
+    }
+} T[MAX], *root;
+
+void insert_trie(char *s) {
+    Trie *u = root;
+    while (*s != '\0') {
+        int id = getID(*s); ++s;
+        if (u->next[id] == NULL)
+            u->next[id] = new_trie();
+        u = u->next[id];
+    }
+    u->state = 1; // mark is a word
+}
+#+END_SRC
+
+** Aho-Corasick automaton
+#+BEGIN_SRC cpp
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <iostream>
-#define MAXN 10
-#define MAXM 10000
+#include <queue>
 using namespace std;
 
-struct phon{
-   char str[MAXN+1];
-} p[MAXM+1];
 
-int cmp(const void *a, const void *b){
-   return strcmp((*(phon *) a).str, (*(phon *) b).str);
-}
+#define MAX 100000
+#define KIND 26
+#define getID(ch) int((ch)-'a')
+#define new_trie() &(T[cnt_trie++]=Trie())
+#define init_trie() cnt_trie=0,root=new_trie()
+int cnt_trie;
 
-int compe(char *a, char *b){
-   for(int i = 0; i<strlen(a); i++)
-      if(a[i]!=b[i])
-         return 0;
-   return 1;
-}
+struct Trie {
+    Trie *next[KIND], *fail;
+    int state;
+    
+    Trie() {
+        state = 0;
+        fail = NULL;
+        for (int i=KIND-1; ~i; --i)
+            next[i] = NULL;
+    }
+} T[MAX], *root;
 
-int cons(phon *p, int n){
-   int i;
-   for(i = 0; i<n-1; i++){
-      if(compe(p[i].str, p[i+1].str))
-         return 0;
-   }
-   return 1;
-}
-
-int main(){
-   int t, n, i;
-   while(scanf("%d", &t)!=EOF){
-      while(t--){
-         scanf("%d", &n);
-         for(i = 0; i<n; i++){
-            scanf("%s", p[i].str);
-         }
-         qsort(p, n, sizeof(p[0]), cmp);
-         printf(cons(p, n) ? "YES\n" : "NO\n");
-      }
-   }
-   return 0;
-}
-
-//静态Trie
-#include <stdio.h>
-#include <string.h>
-#include <iostream>
-using namespace std;
-#define HAS true
-#define NOT false
-
-const int L = 10000 + 10;
-const int N = 1<<16;
-
-struct Node {
-   bool    val, rod;
-   int     son[10];
-};
-
-Node q[N];
-int top;
-char s[L];
-bool flag;
-
-void clear() {
-   memset(q, 0, sizeof(q));
-   top = 1; flag = NOT;
-}
-
-void insert() {
-   int n = 0;
-   for( int i = 0; s[i]; ++i ) {
-      if(!q[n].son[s[i] - '0']){
-         q[n].son[s[i] - '0'] = top;
-         n = top;
-         ++ top;
-      }else{
-         n = q[n].son[s[i] - '0'];
-      }
-      if(s[i+1]) q[n].rod = true;
-      if(q[n].val) flag = HAS;
-   }
-   if(q[n].rod) flag = HAS;
-   q[n].val = true;
+void insert_trie(char *s) {
+    Trie *u = root;
+    while (*s != '\0') {
+        int id = getID(*s); ++s;
+        if (u->next[id] == NULL)
+            u->next[id] = new_trie();
+        u = u->next[id];
+    }
+    u->state = 1; // mark is a word
 }
 
 
-int main(){
-   freopen("POJ.in", "r", stdin);
-   int t, n;
-   scanf("%d", &t);
-   while(t--){
-      clear();
-
-      scanf("%d", &n);
-      for(int i=0;i<n;i++){
-         scanf("%s", s);
-         if(flag == NOT) insert();
-      }
-      if(flag == HAS)
-         printf("NO\n");
-      else
-         printf("YES\n");
-   }
-   return 0;
-}
-#+end_src
-
-** AC自动机
-- 来源：http://hi.baidu.com/%CE%D2%BF%E0%B0%A155/blog/item/7a96fbf35e7ff3db7831aa5b.html
-#+begin_src cpp
+// Main part
 //
-//来源：http://hi.baidu.com/%CE%D2%BF%E0%B0%A155/blog/item/7a96fbf35e7ff3db7831aa5b.html
-//
-#include<cstdio>
-#include<queue>
-#include<cstring>
-#include<bitset>
-using namespace std;
-const int kind = 26;
-const int maxn = 70000;
-int root,tot;
-char ch[1010];
-int n,m;
-struct Node{
-   int child[kind];
-   int fail;
-   int id;
-   void init(){
-      memset(child,0,sizeof(child));
-      fail = -1 , id = 0;
-   }
-}T[maxn];
-int que[maxn],head,tail;
-void init(){
-   root = tot = 0;
-   T[root].init();
+void build_ac_auto() {
+    queue<Trie*> qu;
+    qu.push(root);
+    while (!qu.empty()) {
+        Trie *u = qu.front(); qu.pop();
+        for (int i=0; i<KIND; ++i) {
+            Trie *son = u->next[i];
+            (son!=NULL? qu.push(son), son->fail: u->next[i])
+                = (u==root? root: u->fail->next[i]);
+        }
+    }
 }
-void insert(char *s,int id){
-   int p = root,index;
-   while(*s){
-      index = *s - 'a';
-      if(!T[p].child[index]){
-         T[++tot].init();
-         T[p].child[index] = tot;
-      }
-      p = T[p].child[index];
-      s++;
-   }
-   T[p].id = id;
-}
-void build_ac_auto(){
-   head = tail = 0;
-   que[tail ++] = root;
-   while(head < tail){
-      int u = que[head++];
-      for(int i = 0 ; i < kind ; i ++){
-         if(T[u].child[i]){
-            int son = T[u].child[i];
-            int p = T[u].fail;
-            if(u == root) T[son].fail = root;
-            else T[son].fail = T[p].child[i];
-            que[tail++] = son;
-         }else{//trie图，设定虚拟节点
-            int p = T[u].fail;
-            if(u == root) T[u].child[i] = root;
-            else T[u].child[i] = T[p].child[i];
-         }
-      }
-   }
-}
-int main(){
-   init();
-   scanf("%d",&n);
-   for(int i = 0 ; i < n ; i ++){
-      scanf("%s",ch);
-      insert(ch,i);
-   }
-   build_ac_auto();
-}
-#+end_src
 
-fail指针原则：fail指针的构造关键是找到即是当点匹配串的后缀，又是trie中一个模式串的前缀的最长的字符串。
-see: http://plussai.iteye.com/blog/1143023
+
+// Count how many strings(in Trie) is substring of S.
+//
+int query(char *S) {
+    Trie *u = root;
+    int cnt = 0;
+    while (*S != '\0') {
+        int id = getID(*S); ++S;
+        while (u->next[id]==NULL && u!=root) u=u->fail;
+        u = u->next[id];
+        
+        if (u == NULL) u = root;
+        
+        Trie *v = u;
+        while (v != NULL) {
+            cnt += v->state;
+            v->state = 0;
+            v = v->fail;
+        }
+    }
+    return cnt;
+}
+
+
+int main() {
+    char S[100], word[30];
+    int n;
+    while (scanf("%s", S) != EOF) {
+        scanf("%d", &n);
+        
+        init_trie();
+        
+        while (n--) {
+            scanf("%s", word);
+            insert_trie(word);
+        }
+        build_ac_auto();
+        int cnt = query(S);
+        printf("There are %d word in %s\n", cnt, S);
+    }
+    return 0;
+}
+#+END_SRC
 
 ** 字符串最小表示
 - copied from http://whitedeath.is-programmer.com/posts/18404.html
