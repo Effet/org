@@ -1,0 +1,20 @@
+#+TITLE: Firefox
+#+STARTUP: indent
+
+
+* Tabs on top
+
+@see https://support.mozilla.org/en-US/kb/put-tabs-back-on-bottom
+
+#+BEGIN_EXAMPLE
+about:config
+`browser.tabs.onTop' set false
+#+END_EXAMPLE
+
+* CA
+
+http://lp007819.wordpress.com/2011/02/04/linux-%E4%B8%8B%E5%AE%89%E5%85%A8%E8%AF%81%E4%B9%A6%E7%AE%A1%E7%90%86/
+http://www.cnblogs.com/keepHack/archive/2012/03/20/2408917.html
+http://en.opensuse.org/SDB:Share_certificates_between_applications_or_whole_system
+https://wiki.archlinux.org/index.php/Nss
+http://forum.ubuntu.org.cn/viewtopic.php?f=73&t=399628
