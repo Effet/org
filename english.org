@@ -1,6 +1,14 @@
 #+TITLE: English Learning
 #+OPTIONS:indent
 
+* Dictionary
+
+** GoldenDict
+   
+   - WordNet & JMDict (.dsl)
+       http://sourceforge.net/projects/goldendict/files/dictionaries/
+   - morphologies
+       http://sourceforge.net/projects/goldendict/files/better%20morphologies/1.0/
 
 * by which / in which
   http://tw.knowledge.yahoo.com/question/question?qid=1012030601485
