@@ -235,6 +235,12 @@ https://github.com/salborini/emacs-installer
 * Git
 ** 分治合并
 http://gitbook.liuhui998.com/5_3.html
+
+** change remote
+
+http://stackoverflow.com/questions/2432764/how-to-change-a-remote-repository-uri-using-git
+https://help.github.com/articles/changing-a-remote-s-url
+
 * SSH
 ** ~/.ssh/config
 http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/
