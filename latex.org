@@ -2,7 +2,6 @@
 #+OPTIONS: num:t toc:t \n:nil
 #+OPTIONS: LaTex:t
 #+MATHJAX: align:"left"
-#+STARTUP: indent
 
 * Symbols
 ** Number Set 数域

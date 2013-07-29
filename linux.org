@@ -1,5 +1,4 @@
 #+TITLE: My Linux Journey
-#+STARTUP: indent
 
 *The World's Best OS.*
 

@@ -1,6 +1,4 @@
 #+TITLE: Firefox
-#+STARTUP: indent
-
 
 * Tabs on top
 

@@ -1,5 +1,4 @@
 #+TITLE: English Learning
-#+OPTIONS:indent
 
 * Dictionary
 

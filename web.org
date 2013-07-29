@@ -1,5 +1,4 @@
 #+TITLE: Web
-#+STARTUP: indent
 
 * Tips
 Useful tips for web developing

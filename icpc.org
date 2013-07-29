@@ -1,6 +1,5 @@
 #+TITLE: Algorithm & Formulas For ACM/ICPC
 #+OPTIONS: num:t toc:t \n:nil LaTeX:t
-#+STARTUP: indent
 #+MATHJAX: align:"left"
 
 * Divide & Conquer 分治
