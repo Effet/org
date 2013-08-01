@@ -4,7 +4,9 @@
 #+MATHJAX: align:"left"
 
 * Symbols
-** Number Set 数域
+
+** Number Set
+
 http://texblog.org/2007/08/27/number-sets-prime-natural-integer-rational-real-and-complex-in-latex/
 \(\mathbb{P}\) for prime numbers using \mathbb{P},
 \(\mathbb{N}\) for natural numbers using \mathbb{N},
@@ -14,28 +16,34 @@ http://texblog.org/2007/08/27/number-sets-prime-natural-integer-rational-real-an
 \(\mathbb{R}\) for real numbers using \mathbb{R} and
 \(\mathbb{C}\) for complex numbers using \mathbb{C}.
 
-** 模
+** moduler
+
 *** \(a \equiv b \pmod{m}\)
+
 #+begin_src latex
 a \equiv b \pmod{m}
 #+end_src
 
 *** \(a \bmod b\)
+
 #+begin_src latex
 a \bmod b
 #+end_src
 
 *** 整除
+
 #+begin_src latex
 \big|
 #+end_src
 
 *** 绝对值
+
 #+begin_src latex
 \vert
 #+end_src
 
 *** 集合分隔符
+
 #+begin_src latex
 \mid
 #+end_src

@@ -1,0 +1,55 @@
+#+TITLE: Linux Tips
+
+* Simple Http Server
+
+#+begin_src sh
+python -m SimpleHTTPServer 8080
+#+end_src
+
+* wpa_supplicant
+
+* Zsh
+
+[[https://wiki.archlinux.org/index.php/Zsh#Making_Zsh_your_default_shell][ArchLinux Wiki - Making Zsh default]]
+
+* uncompress .deb
+
+#+begin_src sh
+ar -x *.deb
+#+end_src
+
+* uncompress .rpm
+
+#+begin_src sh
+rpm2targz *.rpm
+#+end_src
+
+* torrent to magnet
+
+http://stackoverflow.com/questions/12479570/given-a-torrent-file-how-do-i-generate-a-magnet-link-in-python
+
+* Dvorak
+
+** Xorg
+
+In File /etc/X11/xorg.conf.d/10-evdev.conf
+#+begin_src conf
+...
+
+Section "InputClass"
+        Identifier "evdev keyboard catchall"
+        MatchIsKeyboard "on"
+        MatchDevicePath "/dev/input/event*"
+        Driver "evdev"
+
+        # setting keyboard layout for slim
+        # TODO: Do not use this in future
+        Option "XkbLayout" "us"
+        Option "XkbVariant" "dvorak"
+        Option "XkbOptions" "terminate:ctrl_alt_bksp"
+EndSection
+
+...
+#+end_src
+
+** Xmodmap

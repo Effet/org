@@ -2,7 +2,7 @@
 
 * Tabs on top
 
-@see https://support.mozilla.org/en-US/kb/put-tabs-back-on-bottom
+see -> https://support.mozilla.org/en-US/kb/put-tabs-back-on-bottom
 
 #+BEGIN_EXAMPLE
 about:config

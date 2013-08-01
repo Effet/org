@@ -1,0 +1,23 @@
+#+TITLE: Some MS-Windows things in the Linux
+
+* dosfsck
+
+-> http://askubuntu.com/questions/147228/how-to-repair-a-corrupted-fat32-file-system
+
+#+BEGIN_SRC sh
+dosfsck -w -r -l -a -v -t /dev/sdc1
+#+END_SRC
+
+more detail, see man.
+
+* Wine
+
+** 不自动关联、生成菜单
+
+http://forum.ubuntu.org.cn/viewtopic.php?f=171&t=377702&start=15
+http://forum.ubuntu.org.cn/viewtopic.php?t=377637&p=2763361
+
+** 完全卸载
+
+http://jay4rest.wordpress.com/2009/11/28/how-to-completely-remove-w-i-n-e/
+

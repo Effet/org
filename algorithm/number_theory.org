@@ -1,0 +1,487 @@
+#+TITLE: Number Theory
+
+* GCD (Greatest Common Divisor)
+
+** Euclidean Algorithm
+
+- \(\gcd(a, b) = \gcd(b, a \bmod b)\)
+#+begin_src cpp
+int gcd(int a,int b) {
+	return b ? gcd(b, a%b) : a;
+}
+#+end_src
+
+- 非递归形式
+#+begin_src cpp
+typedef long long ll;
+
+ll gcd(ll a,ll b){
+    if (a == 0) return 1;
+    if (a < 0) return gcd(-a,b);
+    while (b) {
+        ll t=a%b; a=b; b=t;
+    }
+    return a;
+}
+
+
+//据说是运行次数最少的
+int gcd( int a, int b )
+{
+   if (a == 0) return 1;
+   if (a < 0) return gcd(-a,b);
+   int r, e;
+   while (b != 0)
+   {
+      r = a%b;
+      e = b-r;
+      if (r > e) //需要改成 |r| > |e|
+         r = e;
+
+      a = b;
+      b = r;
+   }
+   return a;
+}
+#+end_src
+
+** Extended GCD
+
+- [[http://zh.wikipedia.org/wiki/%E8%A3%B4%E8%9C%80%E5%AE%9A%E7%90%86][Bézout's identity 裴蜀定理]]\\
+  对任意两个整数\(a\)、\(b\)，设\(d\)是它们的最大公约数。
+  那么关于未知数\(x\)和\(y\)的线性丢番图方程（称为裴蜀等式）：
+  \[ax + by = m\]
+  有整数解\((x，y)\)当且仅当\(m\)是\(d\)的倍数。裴蜀等式有解时必然有无穷多个解。
+  \(m=1\)时，方程有解当且仅当\(a\)、\(b\)互质。
+
+  方程有解时，解的集合是
+  \[
+  \left\{\left(\frac{m}{d}\left(x0 + k\frac{b}{d}\right), \frac{m}{d}\left(y0 - k\frac{a}{d}\right)\right) \mid k\in\mathbb{Z} \right\}
+  \]
+  其中\((x0,y0)\)是方程\(ax + by = d\)的一个解，可由辗转相除法得到。
+  所有解中，有且仅有一个解\((x,y)\)满足\(-b \leq x \leq b\)，\(-a \leq y \leq a\)。
+
+#+begin_src cpp
+typedef long long ll;
+
+ll ex_gcd(ll a, ll b, ll& x, ll& y)
+{
+   ll d;
+   if (b == 0) {
+       x = 1; y = 0;
+       return a;
+   }
+   d  = ex_gcd(b, a%b, y, x);
+   y -= a/b * x;
+   return d;
+}
+#+end_src
+
+* Prime Numbers
+
+** [[http://en.wikipedia.org/wiki/Prime-counting_function#Table_of_.CF.80.28x.29.2C_x_.2F_ln_x.2C_and_li.28x.29][素数个数]]
+
+   |     x |          \pi(x) |
+   |-------+-----------------|
+   |   <r> |             <r> |
+   |    10 |               4 |
+   |  10^2 |              25 |
+   |  10^3 |             168 |
+   |  10^4 |           1,229 |
+   |  10^5 |           9,592 |
+   |  10^6 |          78,498 |
+   |  10^7 |         664,579 |
+   |  10^8 |       5,761,455 |
+   |  10^9 |      50,847,534 |
+   | 10^10 |     455,052,511 |
+   | 10^11 |   4,118,054,813 |
+   | 10^12 |  37,607,912,018 |
+   | 10^13 | 346,065,536,839 |
+   
+** Sieve of Eratosthenes
+
+#+begin_src cpp
+#include <ctime>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+using namespace std;
+
+// 前 10^7 个数中有 664,579个素数
+const int Limit = 10000000;
+
+bool sieve[Limit + 1];
+// int primes[Limit / 2 + 1];
+int primes[664590];
+
+
+void Sieve_of_Eratosthenes()
+{
+    for (int i = 4; i <= Limit; i += 2) sieve[i] = 1;
+	for (int i = 3; i * i <= Limit; i += 2)
+        if (!sieve[i])
+            for (int j = i * i; j <= Limit; j += i)
+                sieve[j] = 1;
+    
+    primes[0] = 1; primes[1] = 2;
+	for(int i = 3; i <= Limit; i += 2)
+		if(!sieve[i])
+			primes[++ primes[0]] = i;
+}
+
+
+// http://blog.sina.com.cn/s/blog_48f85e1d0100ns71.html
+void Sieve_of_Eratosthenes_2(){ //传说中的2倍压缩筛选素数
+    int sievelimit = (sqrt(Limit + .0) - 1) / 2; //只需筛到一半
+    int maxindex = (Limit - 1) / 2;
+    for(int n = 1; n <= sievelimit; ++ n){
+        if(sieve[n] == 0){
+            int t = 2*n + 1; //每次表示域增加2n+1
+            for(int k = 2*n*(n+1); k <= maxindex; k += t) //从2n(n+1)开始
+                sieve[k] = 1;
+        }
+    }
+    primes[0] = 1; primes[1] = 2;
+    for(int n = 1; n <= maxindex; ++ n){
+        if(sieve[n]==0)
+            primes[++ primes[0]] = 2*n+1;//p[n]==0表示的是2*n+1是素数
+    }
+}
+
+
+// http://en.wikipedia.org/wiki/Sieve_of_Atkin
+void Sieve_of_Atkin()
+{
+    int root = (int)ceil(sqrt(Limit + .0));
+    for (int z = 0; z <= Limit; ++ z) sieve[z] = 0;
+    for (int x = 1; x <= root; ++ x)
+    {
+        for (int y = 1; y <= root; ++ y)
+        {
+            int n = 4*x*x + y*y;
+            if (n <= Limit && (n % 12 == 1 || n % 12 == 5)) sieve[n] ^= 1;
+            n = 3*x*x + y*y;
+            if (n <= Limit && n % 12 == 7) sieve[n] ^= 1;
+            n = 3*x*x - y*y;
+            if (x > y && n <= Limit && n % 12 == 11) sieve[n] ^= 1;
+        }
+    }
+    for (int r = 5; r <= root; ++ r)
+        if (sieve[r])
+            for (int i = r*r; i <= Limit; i += r*r)
+                sieve[i] = 0;
+    
+    primes[0] = primes[1] = 2; primes[2] = 3;
+    for (int a = 5; a <= Limit; ++ a)
+        if (sieve[a])
+            primes[++ primes[0]] = a;
+}
+
+
+void test(char *title, void run())
+{
+    time_t op, ed;
+    op = clock();
+    
+    run();
+    
+    ed = clock();
+
+    double dif = (ed - op) * 1000.0 / CLOCKS_PER_SEC;
+    printf("Testing %s ...\n", title);
+    printf("primes: %d, time use: %.3lf ms.\n", primes[0], dif);
+}
+
+
+int main(int argc, char *argv[])
+{
+    test("Sieve of Eratosthenes",
+         Sieve_of_Eratosthenes);
+    
+    memset(sieve, 0, sizeof(sieve));
+    test("Sieve of Eratosthenes 2",
+         Sieve_of_Eratosthenes_2);
+    
+    memset(sieve, 0, sizeof(sieve));
+    test("Sieve of Atkin",
+         Sieve_of_Atkin);
+    return 0;
+}
+#+end_src
+
+** TODO Miller-Rabin大数判素模板 poLLard-rho大数分解模板
+
+- http://blog.ac521.org/?p=533
+
+* 因数
+
++ [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=2716][UVA/11669 - Non-Decreasing Prime Sequence]]
+  - Q: 一数范围[a, b]中所有数按素因子序列长度排序（如10为2,2,5），长度相同时按字典序排。问第k小数的素因子序列。
+  - A: O(n) 分解 2 ~ 1000000 质因子，排序后转化为区间第k小数问题（划分树）。
+    
+* Modular Arithmetic
+
+** Modular Exponentiation
+
+#+begin_src cpp
+typedef long long ll;
+int fastpow(ll a, int b, int c)
+{
+    ll r = 1 % c;
+    while(b)
+    {
+        if (b & 1)
+            r = r * a % c;
+        b >>= 1;
+        a = a * a % c;
+    }
+    return (int)r;
+}
+#+end_src
+
+http://stackoverflow.com/questions/9818129/fastest-algorithm-to-compute-a2nm
+
+** Modular Multiplicative Inverse
+** Congruence
+
+- [[http://zh.wikipedia.org/wiki/%E5%90%8C%E4%BD%99#.E6.80.A7.E8.B4.A8][性质]]
+  - \(\large a \equiv b \pmod{m} \Rightarrow m | (a-b)\)
+
+  - 传递性
+    \[
+    \left. \begin{matrix}
+    a \equiv b \pmod{m} \\
+    b \equiv c \pmod{m}
+    \end{matrix} \right\} \Rightarrow a \equiv c \pmod{m}
+    \]
+
+  - 加减
+    \[
+    \left. \begin{matrix}
+    a \equiv b \pmod{m} \\
+    c \equiv d\pmod{m}
+    \end{matrix} \right\} \Rightarrow \left\{ \begin{matrix} a \pm c \equiv b \pm d \pmod{m} \\ ac \equiv bd \pmod{m} \end{matrix} \right.
+    \]
+
+  - 变小
+    \[a \equiv b \pmod{cn} \Rightarrow a \equiv b \pmod n\]
+    \[
+    \left. \begin{matrix}
+    a \equiv b \pmod{m} \\
+    n|m
+    \end{matrix} \right\} \Rightarrow a \equiv b \pmod n
+    \]
+
+  - 线性同余解的性质
+    \[
+    \left. \begin{matrix}
+    a \equiv b \pmod{m_1} \\
+    a \equiv b \pmod{m_2} \\
+    \vdots \\
+    a \equiv b \pmod{m_n} \\
+    (n \ge 2)
+    \end{matrix} \right\} \Rightarrow a \equiv b \pmod{lcm(m_1,m_2,\cdots,m_n)}
+    \]
+
+** Linear Congruence Theorem
+
+see: http://zh.wikipedia.org/wiki/线性同余方程
+
+形如 \(ax \equiv b \pmod{n}\) 的方程当且仅当 \(\gcd(a,n)|b\) 时有解，解为
+\[
+\left\{ x_0 + k\frac{n}{\gcd(a,n)} \mid k \in \mathbb{Z} \right\}.
+\]
+在 \(\mod{n}\) 的完全剩余系 \({0,1,\cdots,n-1}\) 中，恰有 \(d\) 个解。
+
+- 求解\\
+  若 \(\gcd(a,n)|b\) ，
+  由裴蜀定理，存在整数对 \((r,s)\) 使得 \(ar + sn = \gcd(a,n)\)，因此 \(\large x = r\frac{b}{\gcd(a,n)}\) 是方程的一个解。
+  其他的解都关于 \(\large\frac{n}{\gcd(a,n)}\) 与 \(x\) 同余。
+
+** Chinese Remainder Theorem
+
+- 定义
+  \(n_1,n_2,\cdots,n_k\) 两两互质，对于序列\(a_1,a_2,\cdots,a_k\)，满足以下同余方程组，求解 \(x\) 。
+  \[
+  \begin{align}
+  x &\equiv a_1 \pmod{n_1} \\
+  x &\equiv a_2 \pmod{n_2} \\
+  &{}\  \  \vdots \\
+  x &\equiv a_k \pmod{n_k}
+  \end{align}
+  \]
+
+see: http://www.stubc.com/thread-2918-1-7.html
+#+begin_src cpp
+typedef long long ll;
+
+ll ex_gcd(ll a, ll b, ll& x, ll& y)
+{
+   ll d;
+   if (b == 0) {
+       x = 1; y = 0;
+       return a;
+   }
+   d  = ex_gcd(b, a%b, y, x);
+   y -= a/b * x;
+   return d;
+}
+
+ll Chinese_Remainder(ll* a, ll* n, int k) {
+    ll N = 1, r = 0;
+    for (int i = 0; i < k; ++ i)
+        N *= n[i];
+    for (int i = 0; i < k; ++ i)
+    {
+        ll m = N / n[i], x, y;
+        ex_gcd(m, n[i], x, y);
+        x = (x % n[i] + n[i]) % n[i];
+        r = (r + a[i]*m*x) % N;
+    }
+    return r;
+}
+#+end_src
+
+- [[http://acm.fzu.edu.cn/problem.php?pid=1402][FZU/1402 - 猪的安家]]
+  - A: 模板题
+
+对于一般的情况（即 \(n_1,n_2,\cdots,n_k\) 不两两互质），则满足
+\[
+a_i \equiv a_j \pmod{\gcd(n_i,n_j)} \qquad \text{for all }i\text{ and }j.
+\]
+时，[[http://en.wikipedia.org/wiki/Chinese_remainder_theorem#Theorem_statement][有解]]。
+
+see: http://en.wikipedia.org/wiki/Chinese_remainder_theorem#Solution_for_non-coprime_moduli\\
+see: http://yzmduncan.iteye.com/blog/1323599\\
+see: http://scturtle.is-programmer.com/posts/19363
+#+begin_src cpp
+typedef long long ll;
+typedef pair<ll,ll> mod_p;
+
+ll ex_gcd(ll a, ll b, ll& x, ll& y)
+{
+   ll d;
+   if (b == 0) {
+       x = 1; y = 0;
+       return a;
+   }
+   d  = ex_gcd(b, a%b, y, x);
+   y -= a/b * x;
+   return d;
+}
+
+mod_p Chinese_Remainer_Non_Coprime(vector<mod_p> C)
+{
+    int k = C.size();
+    if (k <= 0)
+        return make_pair(-1, -1);
+    for (int i = k - 2; i >= 0; -- i)
+    {
+        ll a1 = C[i].first,   n1 = C[i].second;
+        ll a2 = C[i+1].first, n2 = C[i+1].second;
+
+        ll c = a2 - a1, p1, p2;
+        ll d = ex_gcd(n1, n2, p1, p2);
+
+        if (c % d != 0)
+            return make_pair(-1, -1);
+
+        ll t = n2 / d;
+        p1 = (c / d * p1 % t + t) % t;
+        ll a0 = a1 + n1 * p1;
+        ll n0 = n1/d * n2;
+        a0 = (a0 % n0 + n0) % n0;
+
+        C[i] = make_pair(a0, n0);
+    }
+    return C[0];
+}
+#+end_src
+
+- [[http://poj.org/problem?id%3D2891][POJ/2891 - Strange Way to Express Integers]]
+  - A: 模板题
+- [[http://acm.hdu.edu.cn/showproblem.php?pid=1573][HDU/1573 - X问题]]
+  - Q: 求非互质同余方程组解\(1 \leq x \leq n\)的个数
+  - A: 注意0不是解
+    
+** Fermat's little theorem
+
+- 若\(p\)为质数，\(\large a^{p} \equiv a \pmod{p}\)
+- 若\(a\)不是\(p\)的倍数，\(\large a^{p-1} \equiv 1 \pmod{p}\)
+  
+** Euler's theorem
+
+- 若\(a\),\(n\)互质，\(\large a^{\varphi(n)} \equiv 1 \pmod{n}\)
+- 求\(\varphi(n)\)
+#+begin_src cpp
+int eular(int n)
+{
+	int r = n;
+	for(int i = 2; i * i <= n; ++ i)
+        if(n % i == 0) {
+            r -= r/i;
+            while(n % i == 0)
+                n /= i;
+        }
+	if(n != 1)
+        r -= r/n;
+	return r;
+}
+#+end_src
+- 预处理版本
+#+begin_src cpp
+const int MAX_N = 100000 + 100;
+
+int phi[MAX_N];
+
+void euler()
+{
+    for(int i = 1; i < MAX_N; ++ i) phi[i]=i;
+    for(int i = 2; i < MAX_N; i+=2) phi[i]/=2;
+    for(int i = 3; i < MAX_N; i+=2)
+        if(phi[i] == i)
+            for(int j = i ; j < MAX_N; j+=i)
+                phi[j] = phi[j]/i * (i-1);
+}
+#+end_src
+
+** 指数循环节
+
+- [[http://hi.baidu.com/aekdycoin/item/e493adc9a7c0870bad092fd9][AC大牛blog]]
+\(x \geq \varphi(n)\)时，
+\[
+\Large A^x \equiv A^{x \mod \varphi(C) + \varphi(C)} \pmod{C}
+\]
+
+* Factorial
+
+** 素因子 p 在 n! 中的个数
+
+#+begin_src cpp
+//how many p in n!
+int prime_factorial(int p, int n)
+{
+	int cnt = 0, r = n/p;
+	while (r) {
+		cnt+=r; r/=p;
+	}
+	return cnt;
+}
+#+end_src
+
+* Digital Roots
+
+see: http://en.wikipedia.org/wiki/Digital_root
++ [[http://poj.org/problem?id=1519][POJ/1519 - Digital Roots]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=1013][HDU/1013 - Digital Roots]]
+  - A: \(dr(n) = 1 + [n-1\pmod 9]\)
+
+* 应用/综合
+
++ [[http://acm.hdu.edu.cn/showproblem.php?pid%3D4335][HDU/4335 - What is N?]]
+  - Q: 满足\(n^{n!} \equiv b \pmod{P} : (0 \leq n \leq M)\) 的 n 有几个。
+    其中 \(0 \leq p \leq 10^5, 1 \leq M \leq 2^{64} - 1\)\\
+  - A: 利用指数的循环节，小范围暴力\(0 \leq n \leq P\)即可。
+
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4350][HDU/4350 - Card]]
+  - A: 可从相对位置不变（环）推得，最小循环长度为\(\frac{R}{\gcd(R,R-L+1)}\)。

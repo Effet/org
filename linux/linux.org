@@ -3,34 +3,45 @@
 *The World's Best OS.*
 
 * Gentoo
+
 ** ebuild
+
 http://devmanual.gentoo.org/function-reference/install-functions/index.html
 
 ** kernel
+
 - 用 make localmodconfig 去掉一些沒用到的
 - 把 lspci -n (sys-apps/pciutils) 貼到 http://kmuto.jp/debian/hcl/，觀察需要的驅動名，然後在 make menuconfig 裏用 h 搜索
 
 ** Print
+
 *** hplip
+
 see: http://en.gentoo-wiki.com/wiki/CUPS#HP_Printers
 
 ** Eix
+
 查看package 属于哪个 overlay
 #+begin_src sh
 eix -Jc
 #+end_src
 
 ** Tips
+
 http://gentoovps.net/gentoo-portage-tips/
 
 ** Time
+
 *** hwclock
+
 usage:
 #+begin_example
 hwclock -w :write current time to hardware time
 hwclock -s :set current time from hardware time
 #+end_example
+
 *** ntpd
+
 #+begin_src sh
 emerge net-misc/openntpd
 #+end_src
@@ -41,10 +52,12 @@ ntpd -s :sync time
 #+end_example
 
 * ArchLinux
+
 This section details archlinux in my eeepc x101 notebook.
 DEADLINE: <2013-03-03 Sun>
 
 ** Disk Infomation
+
 #+begin_src sh
 parted /dev/sda u s p
 #+end_src
@@ -69,6 +82,7 @@ sed -e '/^#.*$/d' -e '/^ *$/d' /etc/fstab
 #+end_example
 
 ** System Time
+
 Time zone setting.
 #+begin_src sh
 ln -s /usr/share/zoneinfo/Europe/Athens /etc/localtime
@@ -77,7 +91,9 @@ Use UTC in hardware clock.
 #+begin_src sh
 hwclock --systohc --utc
 #+end_src
+
 ** Locale
+
 #+begin_src sh
 sed '/^#.*$/d' /etc/locale.gen
 #+end_src
@@ -98,6 +114,7 @@ LC_CTYPE="zh_CN.UTF-8"
 #+end_example
 
 ** Install a New System
+
 netcfg has been installed default.
 #+begin_src sh
 pacstrap /mnt base base-devel \
@@ -118,12 +135,14 @@ pacman -Syy yaourt
 #+end_src
 
 ** Users
+
 Rule to create a new user.
 #+begin_src sh
 useradd -m -g users -G wheel,storage,power -s /bin/zsh <username>
 #+end_src
 
 ** Graphic (base system)
+
 #+begin_src sh
 pacman -S alsa-utils \
           xorg-server{,-utils} xorg-{xinit,utils} \
@@ -139,6 +158,7 @@ pacman -S ttf-{dejavu,droid,inconsolata} \ #,envy-code-r} \
 #+end_src
 
 *** enlightenment17
+
 #+begin_src sh
 pacman -S enlightenment17
 yaourt -S e-modules-extra-svn terminology econnman-svn
@@ -149,11 +169,12 @@ pacman -S lxdm
 systemctl enable lxdm.service
 #+end_src
 
-
 *** monsterwm
+
 pacman -S dmenu
 
 ** Daily Software
+
 #+begin_src sh
 pacman -S vim emacs \
           #opera chromium \
@@ -163,76 +184,23 @@ pacman -S vim emacs \
           rxvt-unicode zathura
 #+end_src
 
+* [[file:windows_stuff_in_linux.org][Some Windows Program/Commands in Linux]]
 
 * Fedora
+
 ** Fetch Package Only
+
 see: [[http://www.cyberciti.biz/faq/yum-downloadonly-plugin/][How To Download a RPM Package Using yum Command Without Installing On Linux]]
 #+begin_src sh
 yum install yum-downloadonly
 yum install abc --downloadonly
 #+end_src
 Packages will in /var/cache/
-* Tips
-** Http Server
-#+begin_src sh
-python -m SimpleHTTPServer 8080
-#+end_src
 
-** wpa_supplicant
-
-** Zsh
-[[https://wiki.archlinux.org/index.php/Zsh#Making_Zsh_your_default_shell][ArchLinux Wiki - Making Zsh default]]
-** 解压 .deb
-#+begin_src sh
-ar -x *.deb
-#+end_src
-
-** 解压 .rpm
-#+begin_src sh
-rpm2targz *.rpm
-#+end_src
-** torrent 转换 magnet
-http://stackoverflow.com/questions/12479570/given-a-torrent-file-how-do-i-generate-a-magnet-link-in-python
-** Dvorak
-*** Xorg
-In File /etc/X11/xorg.conf.d/10-evdev.conf
-#+begin_src conf
-...
-
-Section "InputClass"
-        Identifier "evdev keyboard catchall"
-        MatchIsKeyboard "on"
-        MatchDevicePath "/dev/input/event*"
-        Driver "evdev"
-
-        # setting keyboard layout for slim
-        # TODO: Do not use this in future
-        Option "XkbLayout" "us"
-        Option "XkbVariant" "dvorak"
-        Option "XkbOptions" "terminate:ctrl_alt_bksp"
-EndSection
-
-...
-#+end_src
-
-*** Xmodmap
-* Emacs
-- Delete a whole line
-#+begin_example
-M-x kill-whole-line <C-S-backspace>
-#+end_example
-
-- Backward kill
-#+begin_example
-C-u 0 C-k
-#+end_example
-
-** installer
-https://github.com/salborini/emacs-installer
-** keyfreq
-- http://ergoemacs.org/emacs/command-frequency.html
 * Git
+
 ** 分治合并
+
 http://gitbook.liuhui998.com/5_3.html
 
 ** change remote
@@ -255,16 +223,9 @@ origin	https://github.com/ironyKuU/org.git (push)
 #+END_EXAMPLE
 
 * SSH
+
 ** ~/.ssh/config
+
 http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/
 http://www.lainme.com/doku.php/blog/2011/01/%E4%BD%BF%E7%94%A8ssh_config
-
-* Wine
-
-** 不自动关联、生成菜单
-http://forum.ubuntu.org.cn/viewtopic.php?f=171&t=377702&start=15
-http://forum.ubuntu.org.cn/viewtopic.php?t=377637&p=2763361
-
-** 完全卸载
-http://jay4rest.wordpress.com/2009/11/28/how-to-completely-remove-w-i-n-e/
 

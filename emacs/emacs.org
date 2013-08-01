@@ -1,0 +1,29 @@
+#+TITLE: Emacs
+
+* Frequent command/keybinding
+
+** Delete a whole line
+
+#+begin_example
+M-x kill-whole-line <C-S-backspace>
+#+end_example
+
+** Backward kill
+
+#+begin_example
+C-u 0 C-k
+#+end_example
+
+* Windows Installation
+
+see -> https://github.com/salborini/emacs-installer
+, and I forked here https://github.com/ironyKuU/emacs-installer
+
+* Key-analysing (keyfreq)
+
+see -> http://ergoemacs.org/emacs/command-frequency.html
+
+* Org-mode
+
+Note for org-mode.
+[[file:org.org][SEE MORE]]

@@ -1,0 +1,638 @@
+#+TITLE: String Algorithm
+
+* KMP
+
+** [[http://www.matrix67.com/blog/archives/115][matrix67'blog]] refers, based on 算法导论
+
+#+begin_src cpp
+//来源及参考:http://www.matrix67.com/blog/archives/115
+//（基于算法导论介绍的KMP算法）
+
+
+const int MAX_LEN = 100000 + 10;
+
+int pre[MAX_LEN];
+// pre[j] is max-number satisfy ``P[1 .. pre[j]] = P[[j-pre[j]+1 .. j]''.
+// String P[1 .. n].
+void make_prefix(char *P, int m)
+{
+   pre[1] = 0;
+   for (int i = 2, j = 0; i <= m; ++ i)
+   {
+      while (j > 0 && P[j+1] != P[i]) j = pre[j];
+      if (P[j+1] == P[i]) ++ j;
+      pre[i] = j;
+   }
+}
+
+// String T[1 .. n], P[1 .. m].
+void KMP(char *T, int n, char *P, int m)
+{
+   for (int i = 1, j = 0; i <= n; ++ i)
+   {
+      while (j > 0 && P[j+1] != T[i]) j = pre[j];
+      if ( P[j+1] == T[i] ) ++ j;
+      if ( j == m )
+      {
+         printf("Preattern occurs with shift %d\n", i - m);
+         j = pre[j];
+      }
+   }
+}
+#+end_src
+
+** 浙大模板中稍有不同的KMP算法：
+
+#+begin_src cpp
+//另一种解释，来源：浙大模板
+//fail[j]代表了，在t串在j点失配时（s[i] != t[j]）
+//应将t串j改变后的值，即t[1..fail[j]-1]仍是与s[i]匹配的，
+//这时候就是试验s[i] 是否与 t[fail[j]]相匹配了，否则再递归操作。
+const int maxlen = 1000;
+
+int fail[maxlen];
+void makefail( char *t, int lt )
+{
+    --t;
+    for(int i=1,j=0;i<=lt;i++,j++){
+        fail[i]=j;
+        while(j>0 && t[i]!=t[j]) j=fail[j];
+    }
+}
+
+// start matching pattern T in S[i..)
+// return match pos or longest match length with corresponding pos
+int kmp(char *s, int ls, char *t, int lt, int i,int &longest,int &lp)
+{
+    longest = lp = 0; --s; --t;
+    for(int j=1; i<=ls; i++,j++) {
+        while( j>0 && s[i]!=t[j] ) j=fail[j];
+        if( j>longest ) { longest = j; lp = i-j; }
+        if( j==lt ) return i-lt;
+    }
+    return -1;
+}
+#+end_src
+
+** 字符串最小循环节
+
+基于KMP
+#+begin_src cpp
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+using namespace std;
+
+const int MAX_LEN = 1000000 + 10;
+
+int pre[MAX_LEN];
+// pre[j] is max-number satisfy ``P[1 .. pre[j]] = P[[j-pre[j]+1 .. j]''.
+// String P[1 .. n].
+void make_prefix(char *P, int m)
+{
+   pre[1] = 0;
+   for (int i = 2, j = 0; i <= m; ++ i)
+   {
+      while (j > 0 && P[j+1] != P[i]) j = pre[j];
+      if (P[j+1] == P[i]) ++ j;
+      pre[i] = j;
+   }
+}
+
+
+char str[MAX_LEN];
+
+int main()
+{
+   // Use str[1 .. n].
+   while(scanf("%s", str + 1) != EOF)
+   {
+       if (str[1] == '.')
+           break;
+
+       int n = strlen(str + 1);
+       make_prefix(str, n);
+
+       if(n % (n - pre[n]) == 0 && n/(n - pre[n]) >= 2)
+           printf("%d\n", n/(n-pre[n]));
+       else
+           printf("%d\n", 1);
+   }
+   return 0;
+}
+#+end_src
+
+- 例题：poj2406
+  
+* Trie Tree
+
+#+BEGIN_SRC cpp
+#define MAX 100000
+#define KIND 26
+#define getID(ch) int((ch)-'a')
+#define new_trie() &(T[cnt_trie++]=Trie())
+#define init_trie() cnt_trie=0,root=new_trie()
+int cnt_trie;
+
+struct Trie {
+    Trie *next[KIND];
+    int state;
+
+    Trie() {
+        state = 0;
+        for (int i=KIND-1; ~i; --i)
+            next[i] = NULL;
+    }
+} T[MAX], *root;
+
+void insert_trie(char *s) {
+    Trie *u = root;
+    while (*s != '\0') {
+        int id = getID(*s); ++s;
+        if (u->next[id] == NULL)
+            u->next[id] = new_trie();
+        u = u->next[id];
+    }
+    u->state = 1; // mark is a word
+}
+#+END_SRC
+
+* Aho-Corasick automaton
+
+#+BEGIN_SRC cpp
+#include <stdio.h>
+#include <queue>
+using namespace std;
+
+
+#define MAX 100000
+#define KIND 26
+#define getID(ch) int((ch)-'a')
+#define new_trie() &(T[cnt_trie++]=Trie())
+#define init_trie() cnt_trie=0,root=new_trie()
+int cnt_trie;
+
+struct Trie {
+    Trie *next[KIND], *fail;
+    int state;
+
+    Trie() {
+        state = 0;
+        fail = NULL;
+        for (int i=KIND-1; ~i; --i)
+            next[i] = NULL;
+    }
+} T[MAX], *root;
+
+void insert_trie(char *s) {
+    Trie *u = root;
+    while (*s != '\0') {
+        int id = getID(*s); ++s;
+        if (u->next[id] == NULL)
+            u->next[id] = new_trie();
+        u = u->next[id];
+    }
+    u->state = 1; // mark is a word
+}
+
+
+// Main part
+//
+void build_ac_auto() {
+    queue<Trie*> qu;
+    qu.push(root);
+    while (!qu.empty()) {
+        Trie *u = qu.front(); qu.pop();
+        for (int i=0; i<KIND; ++i) {
+            Trie *son = u->next[i];
+            (son!=NULL? qu.push(son), son->fail: u->next[i])
+                = (u==root? root: u->fail->next[i]);
+        }
+    }
+}
+
+
+// Count how many strings(in Trie) is substring of S.
+//
+int query(char *S) {
+    Trie *u = root;
+    int cnt = 0;
+    while (*S != '\0') {
+        int id = getID(*S); ++S;
+        while (u->next[id]==NULL && u!=root) u=u->fail;
+        u = u->next[id];
+
+        if (u == NULL) u = root;
+
+        Trie *v = u;
+        while (v != NULL) {
+            cnt += v->state;
+            v->state = 0;
+            v = v->fail;
+        }
+    }
+    return cnt;
+}
+
+
+int main() {
+    char S[100], word[30];
+    int n;
+    while (scanf("%s", S) != EOF) {
+        scanf("%d", &n);
+
+        init_trie();
+
+        while (n--) {
+            scanf("%s", word);
+            insert_trie(word);
+        }
+        build_ac_auto();
+        int cnt = query(S);
+        printf("There are %d word in %s\n", cnt, S);
+    }
+    return 0;
+}
+#+END_SRC
+
+* 字符串最小表示
+
+copied from http://whitedeath.is-programmer.com/posts/18404.html
+#+begin_src cpp
+//http://whitedeath.is-programmer.com/posts/18404.html
+//这个是网上最一般的最小表示法代码：
+int MinimumRepresentation(char *s, int len){
+    int i = 0, j = 1, count = 0, t;
+    while(i<len&&j<len&&count<len){
+        if(s[(i+count)%len]==s[(j+count)%len])
+            count++;
+        else{
+            if(s[(i+count)%len]>s[(j+count)%len])
+                i = i+count+1;
+            else
+                j = j+count+1;
+            if(i==j)
+                ++j;
+            count = 0;
+        }
+    }
+    return min(i, j);
+}
+
+//首先，求余过程很费时间，尤其是字符串比较长的时候。而且本题中最多是len的2倍，所有变求余为作差；
+//其次，最后的return min(i,j)可以改成直接return i，因为i <= j是肯定的....因为用通俗的说法，每次i都会把j拉到i+1的位置，所以最后，可以在改变i的时候，将j也拖过去....
+//最终代码：
+int MinimumRepresentation(char *s, int len){
+    int i = 0, j = 1, count = 0, t;
+    while(i<len&&j<len&&count<len){
+        int x = i+count;
+        int y = j+count;
+
+        if(x>=len)
+            x -= len; //用减法代替求余
+        if(y>=len)
+            y -= len; //用减法代替求余
+
+        if(s[x]==s[y])
+            count++;
+        else{
+            if(s[x]>s[y]){
+                i = i+count+1;
+                j = i+1; /*将 j 拖至 i + 1 的地方*/
+            }else
+                j = j+count+1;
+
+            if(i==j)
+                j++;
+            count = 0;
+        }
+    }
+
+    return i; //直接return i即可
+}
+#+end_src
+
+* Subsequence & Substring 子序列 & 子串 问题
+
+** LCPS (Longest Common Palindromic Subsequence) 最长公共回文子序列
+
+- \(\mathcal{O}(n^4)\)
+#+begin_src cpp
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <cstdio>
+using namespace std;
+
+const int MAX_N = 100;
+
+char x[MAX_N];
+char y[MAX_N];
+int lcps[MAX_N][MAX_N][MAX_N][MAX_N];
+
+int LCPSLength(char *x, char *y)
+{
+    int n = strlen(x + 1);
+    int m = strlen(y + 1);
+
+    // cout << endl << n <<  " " << m << endl;
+
+    // memset(lcps, 0, sizeof(lcps));
+    for (int i = 1; i <= n; ++ i)
+        for (int j = i; j <= n; ++ j)
+            for (int k = 1; k <= m; ++ k)
+                for (int l = k; l <= m; ++ l)
+                    if ( (i == j || k == l) &&
+                         (x[i] == y[k] || x[i] == y[l] ||
+                          x[j] == y[k] || x[j] == y[l])
+                        )
+                        lcps[i][j][k][l] = 1;
+                    else
+                        lcps[i][j][k][l] = 0;
+
+    for (int xLength = 2; xLength <= n; ++ xLength)
+        for (int yLength = 2; yLength <= m; ++ yLength)
+            for (int i = 1; i <= n - xLength + 1; ++ i)
+                for (int k = 1; k <= m - yLength + 1; ++ k)
+                {
+                    int j = i + xLength - 1;
+                    int l = k + yLength - 1;
+                    if (x[i] == x[j] && x[j] == y[k] && y[k] == y[l])
+                        lcps[i][j][k][l] = 2 + lcps[i + 1][j - 1][k + 1][l - 1];
+                    else
+                        lcps[i][j][k][l] = max(lcps[i + 1][j][k][l],
+                                               max(lcps[i][j - 1][k][l],
+                                                   max(lcps[i][j][k + 1][l],
+                                                       lcps[i][j][k][l - 1])));
+                }
+
+    // for (int i = 1; i <= n; ++ i) {
+    //     for (int j = 1; j <= n; ++ j) {
+    //         for (int k = 1; k <= m; ++ k) {
+    //             for (int l = 1; l <= m; ++ l) {
+    //                 cout << i << " "<< j << " " << k << " " << l << " " << lcps[i][j][k][l] << endl;
+    //             }
+    //         }
+    //     }
+    // }
+
+    return lcps[1][n][1][m];
+}
+
+int main(int argc, char *argv[])
+{
+    int t;
+    cin >> t;
+    for (int cas = 1; cas <= t; ++ cas)
+    {
+        cin >> x + 1 >> y + 1;
+        cout << "Case " << cas << ": ";
+        cout << LCPSLength(x, y) << endl;
+    }
+    return 0;
+}
+#+end_src
++ [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3917][UVA/12473 - Common Palindrome]]
+  
+** LIS (Longest Increasing Subsequence) 最长上升（不降）子序列
+
+- \(\mathcal{O}(n\log{n})\) 算法
+#+begin_src cpp
+#define _cp(a,b) ((a)<(b))
+
+const int MAX_N = 100000 + 10;
+
+int f[MAX_N];
+
+int lis(int s[], int n)//单调不降子序列nlogn算法
+{
+    int l, r, mid, len = 1;
+    f[1] = s[1];
+    for(int i = 2; i<=n; i++){
+        l = 1, r = len;
+        if(_cp(f[len],s[i])){
+            f[++len] = s[i];
+            continue;
+        }
+        while(l<=r){
+            mid = (l+r)>>1;
+            if(_cp(f[mid],s[i]))
+                l = mid+1;//不降
+            else
+                r = mid-1;//二分查找
+        }
+        f[l] = s[i];//插入
+        if(l>len)
+            len++;//增加长度
+    }
+    return len;
+}
+#+end_src
+- usaco 4.3（经典LIS模板）
+#+begin_src cpp
+/*
+   ID: majunch2
+   LANG: C++
+   PROG: buylow
+*/
+//usaco 4.3
+//很经典的O(nlogn)LIS问题，还可以求序列方案数
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+//#include <cmath>
+#include <algorithm>
+//#include <ctime>
+using  namespace std;
+const double inf = 1e15;
+
+int p[5010],f[5010];  //p[i]为值，f[i]为以第i元素为末元素的最长上升子序列长度
+int best[5010];  //best[i]表示长度为i的序列的当前最小末元素
+int num[5010];   //num[i]表示以第i元素为末元素的最长上升子序列方案数
+
+int find(int l,int r,int key)
+{
+    int mid;
+    while (1)
+    {
+        mid=(l+r)>>1;
+        if (best[mid]<key && key<=best[mid+1])
+            return mid+1;
+        if (best[mid-1]<key && key<=best[mid])
+            return mid;
+        if ( key<best[mid] )
+            r=mid-1;
+        else l=mid+1;
+    }
+}
+
+
+
+int main()
+{
+    //freopen("buylow.in","r",stdin);
+    //freopen("buylow.out","w",stdout);
+    int n;
+    scanf("%d",&n);
+    for (int i=n;i>=1;i--)
+        scanf("%d",&p[i]);
+    memset(best,-1,sizeof(best));
+    int k;
+    int ans=1;
+    best[1]=p[1];f[1]=1;
+    for (int i=2;i<=n;i++)
+    {
+        if (p[i]<=best[1]) k=1;  //这里寻k值要很小心，不然容易死循环
+        else if (p[i]>best[ans]) k=++ans;
+        else k=find(1,ans,p[i]);
+
+        best[k]=p[i];
+        f[i]=k;
+    }
+    printf("%d ",ans);
+
+    //如果相同的序列只能算一种方案，那需要判重，最简单的就是用bool数组了，但由于序列的特性，这里只使用now同样可以
+    for (int i=1;i<=n;i++)
+    {
+        if (f[i]==1) { num[i][0]=num[i][1]=1; continue; }
+        int now=-1;
+        for (int j=i-1;j>=1;j--)
+           if (f[j]+1==f[i] && p[j]<p[i] && now!=p[j])
+           {
+               num[i]+=num[j];
+               now=p[j];        //这里值得思考一下，很简单，对于符合条件的
+           }                    //重复的两个数（假设为p[i1]=p[i2])肯定是连续枚举的，因为如果中
+    }                      //还枚举了其他数(假设有p[j])那会矛盾。
+            //若p[j]>p[i1],就有f[j]至少为f[i1]+1，不符合枚举条件；
+            //若p[j]<p[i1],就有f[i2]至少为f[j]+1,这样p[i2]不会枚举到，矛盾。
+
+    int now=-1;
+    int sum=0;
+    for (int i=1;i<=n;i++)
+        if (f[i]==ans && now!=p[i])
+        {
+            sum+=num[i];
+            now=p[i];
+        }
+    printf("%d/n",sum);
+
+
+    return 0;
+}
+#+end_src
+- \(\mathcal{O}(n^2)\) 算法
+#+begin_src cpp
+int Longest_Increasing(int num[], int n){
+    int lis[n], i, j;
+    for(i = 0; i<n; i++){
+        lis[i] = 1;
+        for(j = 0; j<i; j++)
+            if(num[i]>num[j]&&lis[j]+1>lis[i])
+                lis[i] = lis[j]+1;
+    }
+    int maxn = 0;
+    for(i = 0; i<n; i++)
+        if(maxn<lis[i])
+            maxn = lis[i];
+    return maxn;
+}
+#+end_src
+- 求长度为最长上升子序列的序列个数
+#+begin_src cpp
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <string>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int b[100005], p[100005];
+int n, a[100005];
+void fun() //传入n个数,a[]
+{
+   memset( p, 0, sizeof(p) );
+   b[1]=a[0];
+   int i;
+   int begine=1,end=1;
+   for(i=1;i<n;i++)
+   {
+      if(a[i]>b[end])
+         b[++end]=a[i];
+      else
+      {
+         int x=begine,y=end;
+         while(x<y)
+         {
+            int mid=(x+y)/2;
+            if(b[mid]>=a[i])
+               y=mid;
+            else
+               x=mid+1;
+         }
+         b[y]=a[i];
+         if ( p[y-1]>0 || y == 1 )
+            ++ p[y];
+      }
+   }
+   //   for ( int i=1; i<=end; i++ ){
+   //      printf( " %d", p[i] );
+   //   }
+   //   printf( "\n" );
+   printf("%d\n%d\n",end, p[end]+1); //输出最长上升子序列的长度
+
+}
+
+int main() {
+   while ( scanf( "%d", &n ) != EOF ) {
+      for ( int i=0; i<n; i++ ){
+         scanf( "%d", &a[i] );
+      }
+      fun( );
+   }
+   return 0;
+}
+#+end_src
+
+** LPS (Longest Palindromic Substring) 最长回文子串
+
+- Manacher
+#+begin_src cpp
+/*str是这样一个字符串（下标从1开始）：
+  举例：若原字符串为"abcd"，则str为"$#a#b#c#d#"，最后还有一个终止符。
+  n为str的长度，若原字符串长度为nn，则n=2*nn+2。
+  rad[i]表示回文的半径，即最大的j满足str[i-j+1...i] = str[i+1...i+j]，
+  而rad[i]-1即为以str[i]为中心的回文子串在原串中的长度*/
+
+#define MAXN 100001
+char str[2*MAXN];
+int rad[2*MAXN];
+int Manacher(char *s)
+{
+    int i,mx = 0,id,len,n,ans=0;
+    len = strlen(s);
+    n = len*2+2;
+    str[0] = '$';
+    for(i=0;i<=len;i++){
+        str[i*2+1] = '#';
+        str[i*2+2] = s[i];
+    }
+    for(i=1; i<n; i++)
+    {
+        if( mx > i )
+            rad[i] = rad[2*id-i]<mx-i?rad[2*id-i]:mx-i;
+        else
+            rad[i] = 1;
+        for(; str[i+rad[i]] == str[i-rad[i]]; rad[i]++)
+            ;
+        if( rad[i] + i > mx )
+        {
+            mx = rad[i] + i;
+            id = i;
+        }
+    }
+    for(i=0;i<n;i++)
+        ans=rad[i]>ans?rad[i]:ans;
+    return ans;
+}
+#+end_src

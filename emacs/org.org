@@ -1,24 +1,30 @@
 #+TITLE: Org-mode
 
 * Usage of Org-mode
+
 ** Shortcut keys
+
 *** todo
+
 #+begin_example
 C-c C-t
 #+end_example
 
 *** open link
+
 #+begin_example
 C-c C-o
 #+end_example
 
 *** only view a little
+
 #+begin_example
 C-x n s
 C-x n w
 #+end_example
 
 *** LaTex
+
 Preview the LaTeX fragment at point, or all locally or globally.
 #+begin_example
 C-c C-x C-l
@@ -29,4 +35,5 @@ C-c C-c
 #+end_example
 
 ** org-mode settings
+
 http://www.codewaysky.com/archives/412.html

@@ -1,0 +1,1421 @@
+#+TITLE: Computational Geometry
+
+* Circles
+
+** Relative
+
+#+BEGIN_EXAMPLE
+concentric        (d = 0)
+interior          (d < R - r)
+interior tangents (d = R - r)
+secants           (R - r < d < R + r)
+exterior tangents (d = R + r)
+exterior          (d > R + r)
+#+END_EXAMPLE
+
+** Segment
+
+$r^2 \frag{\theta - \sin{\theta}}{2}$
+
+* 旋转卡壳
+
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=2838][UVALive/4837 - Gunshots]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=3684][HDU/3684 - Gunshots]]
+  - Q: 100个多边形(每个1000个点)，10000条射线，问每条射线最先射到哪个多边形，没有输出MISS
+  - A: 将多边形做成凸包与原问题等价，用离线的做法：将所有射线极角排序，同时做100个凸包的旋转卡壳。
+
+POJ/3608 凸多边形间距离
+
+* 几何变换
+
++ [[http://acm.zju.edu.cn/onlinejudge/showProblem.do?problemId=3782][ZOJ/3338 - Map]]
+  - Q: 将二维矩形仿射变换后求座标没有变化的点
+  - A: 求出复合矩阵后解二元一次方程即可
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3101][UVALive/5100 - Shade of Hallelujah Mountain]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=3692][HDU/3692 - Shade of Hallelujah Mountain]]
+  - Q: 一凸多面体，一点光源，一平面，求凸包在平面的阴影面积。
+  - A: 先判断面积为零：点光源相对于平面在所有点之下，面积无穷：点在最高点与最低点之间；
+       面积由穷时，将点光源到所有点的射线与平面交，将所有交点随平面旋转至z=k的平面，做二维凸包面积即可。
+
+* 圆问题
+
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=4023][UVAlive/6012 - Fence]]
+  - Q: 多圆求凸包
+  - A: 计算任意两圆不相交切线的四个切点，将所有点做凸包即可。
+#+BEGIN_SRC cpp
+#include <cmath>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+using namespace std;
+
+
+const double EPS = 1e-8;
+const double PI  = acos(-1.0);
+
+double  pow2(double x)  {return x * x;}
+int     sign(double x)  {return x < -EPS ? -1 : x > EPS ? 1 : 0;}
+// Fix angle in [0, 2*PI]
+double fix_p(double th) {return sign(th) < 0 ? th + 2*PI : th;}
+// Fix angle in [-PI, PI]
+double   fix(double th) {return sign(th + PI) < 0 ? th+2*PI : sign(th - PI) > 0 ? th-2*PI : th;}
+double _acos(double th) {return sign(th + 1) <= 0 ?      PI : sign(th - 1) >= 0 ?       0 : acos(th);}
+double _asin(double th) {return sign(th + 1) <= 0 ?   -PI/2 : sign(th - 1) >= 0 ?    PI/2 : asin(th);}
+
+
+struct Point {
+    double x, y;
+    Point(double x = 0, double y = 0) : x(x), y(y) {}
+
+    // Used in Circle Convex Hull
+    int id; Point(Point p, int _id) {x = p.x, y = p.y; id = _id;}
+
+    Point  operator -() const {return Point(-x, -y);}
+    Point  operator +(const Point  &p) const {return Point(x+p.x, y+p.y);}
+    Point  operator -(const Point  &p) const {return Point(x-p.x, y-p.y);}
+    Point  operator *(const double &s) const {return Point(x*s, y*s);}
+    Point  operator /(const double &s) const {return Point(x/s, y/s);}
+    
+    double operator ^(const Point  &p) const {return x*p.y - y*p.x;}
+    double operator *(const Point  &p) const {return x*p.x + y*p.y;}
+
+    bool   operator <(const Point  &p) const {return sign(x - p.x) < 0 || (sign(x - p.x) == 0 && sign(y - p.y) < 0);}
+
+    
+    // rotate vector (Right/Left hand)
+    Point  R(double th) {return Point(x*cos(th)-y*sin(th), x*sin(th)+y*cos(th));}
+    Point  L(double th) {return R(2*PI - th);}
+    
+    double len2()  {return x*x + y*y;}
+    double len()   {return sqrt(len2());}
+    double ang()   {return atan2(y, x);}
+    Point  e()     {return Point(x/len(), y/len());}
+    void   get()   {cin >> x >> y;}
+    void   print() {cout << "Point: (" << x << ", " << y << ")" << endl;}
+};
+
+struct Line {
+    Point a, b;
+    Line(Point a, Point b) : a(a), b(b) {}
+
+    void get() {a.get(); b.get();}
+    void print() {cout << "Line:" << endl; cout << " `--"; a.print(); cout << " `--"; b.print();}
+};
+
+struct Circle {
+    Point  o;
+    double r;
+
+    // Area of ``circular segment'' (弓形)
+    double segment_area(const double &th) {return 0.5 * pow2(r) * (th - sin(th));}
+    double dis(const Circle &c) const {return (o - c.o).len();}
+
+    // -2: 内含 (d < R - r) // -1: 内切 (d = R - r)
+    //  0: 相交 (R - r < d < R + r)
+    //  1: 外切 (d = R + r) //  2: 外离 (d > R + r)
+    int pos(const Circle &c) const {
+		double d = dis(c);
+        int pd1 = sign(d - fabs(r - c.r)), pd2 = sign(d - (r + c.r));
+        return pd1<0? -2 : pd1==0? -1 : pd2==0? 1 : pd2>0? 2 : 0;
+	}
+
+    // 两圆相交弦，满足两圆相交
+    // 返回此圆上逆时针
+    // TODO:test
+    Line chord(const Circle &c) const {
+        Point v = c.o - o;
+        double th = _acos((pow2(r) + v.len2() - pow2(c.r)) / (2 * r * v.len()));
+        return Line(v.L(th).e() * r + o, v.R(th).e() * r + o);
+    }
+
+    // 两圆相切交点
+    // _d = 0 切线不交叉，须满足相交、外切或外离
+    // _d = 1 切线交叉，须满足外离
+    // 返回圆上逆时针
+    // TODO:test
+    Line tangent_points(const Circle &c, const int &_d) const {
+        Point  v = c.o - o;
+        double th = _acos((_d&0x1 ? r+c.r : r-c.r) / v.len());
+        return Line(v.L(th).e() * r + o, v.R(th).e() * r + o);
+    }
+
+    // 两圆切线单位向量
+    // _d = 0 切线不交叉，须满足相交、外切或外离
+    // _d = 1 切线交叉，须满足外离
+    // 返回起点逆时针
+    Line tangent_vector(const Circle &c, const int &_d) const {
+        Point v = c.o - o;
+        double th = _asin((_d&0x1 ? r+c.r : r-c.r) / v.len());
+        return Line(v.R(th).e(), v.L(th).e());
+    }
+
+    void get()   {o.get(); cin >> r;}
+    void print() {cout << "Circle:" << endl; cout << " `--"; o.print(); cout << " `--R: " << r << endl;}
+};
+
+
+// -PI <= th <= PI
+struct Range {
+    double th;
+    int    t;
+    Range(double th = 0, int t = 0) : th(th), t(t) {}
+    bool operator <(const Range &s) const {return sign(th - s.th) < 0 || (sign(th - s.th) == 0 && t > s.t);}
+};
+
+
+// 圆环区间
+struct Ranges {
+    int nc;
+    vector<Range> R;
+    Ranges() {clear();}
+    void clear() {nc = 0; R.clear();}
+    
+    void add(double th, int     t) {R.push_back(Range(th, t));}
+    void add(double st, double ed) {st = fix(st); ed = fix(ed); if (sign(st - ed) > 0) ++ nc; add(st, 1); add(ed, -1);}
+    void add(Point  st, Point  ed) {add(st.ang(), ed.ang());}
+    void add(Line l) {add(l.a, l.b);}
+    
+    void run() {sort(R.begin(), R.end());}
+    
+    int get_max() {
+        int r = nc;
+        double pj = - PI;
+        for(int j = 0; j < R.size(); ++ j) {
+            nc += R[j].t; pj  = R[j].th;
+            r = max(r, nc);
+        }
+        return r;
+    }
+};
+
+
+// 凸包模板
+vector<Point> convex_hull(vector<Point> P)
+{
+	int n = P.size(), k = 0;
+	vector<Point> H(2*n);
+
+	// Sort points lexicographically
+	sort(P.begin(), P.end());
+
+	// Build lower hull
+	for (int i = 0; i < n; i++) {
+        while (k >= 2 && sign((H[k-1]-H[k-2])^(P[i]-H[k-2])) <= 0) -- k;
+		H[k++] = P[i];
+	}
+
+	// Build upper hull
+	for (int i = n-2, t = k+1; i >= 0; i--) {
+        while (k >= t && sign((H[k-1]-H[k-2])^(P[i]-H[k-2])) <= 0) -- k;
+		H[k++] = P[i];
+	}
+
+	H.resize(k);
+	return H;
+}
+
+
+// 多圆凸包（周长）
+double circle_convex_hull(vector<Circle> &C)
+{
+    int n = C.size();
+    if (n == 1) return 2 * PI * C[0].r;
+
+    vector<Point> P;
+    for (int i = 0; i < n; ++ i)
+        for (int j = i + 1; j < n; ++ j)
+        {
+            Line li = C[i].tangent_points(C[j], 0);
+            Line lj = C[j].tangent_points(C[i], 0);
+            P.push_back(Point(li.a, i));
+            P.push_back(Point(li.b, i));
+            P.push_back(Point(lj.a, j));
+            P.push_back(Point(lj.b, j));
+        }
+
+    vector<Point> CH = convex_hull(P);
+
+    double ans = 0;
+    int m = CH.size() - 1;
+    for (int i = 0; i < m; ++ i)
+    {
+        if (CH[i].id != CH[i+1].id)
+            ans += (CH[i] - CH[i+1]).len();
+        else
+        {
+            Circle c = C[CH[i].id];
+            ans += c.r * fix_p((CH[i+1] - c.o).ang() - (CH[i] - c.o).ang());
+        }
+    }
+    
+    return ans;
+}
+
+int main()
+{
+    int t;
+    cin >> t;
+    while (t--)
+    {
+        int n;
+        cin >> n;
+        vector<Circle> C(n);
+        for (int i = 0; i < n; ++ i)
+            C[i].get();
+
+        double ans = circle_convex_hull(C);
+        printf("%.5lf\n", ans);
+    }
+    return 0;
+}
+#+END_SRC
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4116][HDU/4116 - Fruit Ninja]]
+  - Q: 求平面一直线最多能交几个圆
+  - A: 推论：最优直线可为某一圆切线。
+#+BEGIN_SRC cpp
+#include <cmath>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+
+const double EPS = 1e-8;
+const double PI  = acos(-1.0);
+
+double  pow2(double x)  {return x * x;}
+int     sign(double x)  {return x < -EPS ? -1 : x > EPS ? 1 : 0;}
+// Fix angle in [-PI, PI]
+double   fix(double th) {return sign(th + PI) < 0 ? th+2*PI : sign(th - PI) > 0 ? th-2*PI : th;}
+double _acos(double th) {return sign(th + 1) <= 0 ?      PI : sign(th - 1) >= 0 ?       0 : acos(th);}
+double _asin(double th) {return sign(th + 1) <= 0 ?   -PI/2 : sign(th - 1) >= 0 ?    PI/2 : asin(th);}
+
+
+struct Point {
+    double x, y;
+    Point(double x = 0, double y = 0) : x(x), y(y) {}
+
+    Point  operator -() const {return Point(-x, -y);}
+    Point  operator +(const Point  &p) const {return Point(x+p.x, y+p.y);}
+    Point  operator -(const Point  &p) const {return Point(x-p.x, y-p.y);}
+    Point  operator *(const double &s) const {return Point(x*s, y*s);}
+    Point  operator /(const double &s) const {return Point(x/s, y/s);}
+    
+    double operator ^(const Point  &p) const {return x*p.y - y*p.x;}
+    double operator *(const Point  &p) const {return x*p.x + y*p.y;}
+    
+    // rotate vector (Right/Left hand)
+    Point  R(double th) {return Point(x*cos(th)-y*sin(th), x*sin(th)+y*cos(th));}
+    Point  L(double th) {return R(2*PI - th);}
+    
+    double len2()  {return x*x + y*y;}
+    double len()   {return sqrt(len2());}
+    Point  e()     {return Point(x/len(), y/len());}
+    void   get()   {cin >> x >> y;}
+    void   print() {cout << "Point: (" << x << ", " << y << ")" << endl;}
+};
+
+struct Line {
+    Point a, b;
+    Line(Point a, Point b) : a(a), b(b) {}
+
+    void get() {a.get(); b.get();}
+    void print() {cout << "Line:" << endl; cout << " `--"; a.print(); cout << " `--"; b.print();}
+};
+
+struct Circle {
+    Point  o;
+    double r;
+
+    // Area of ``circular segment'' (弓形)
+    double segment_area(const double &th) {return 0.5 * pow2(r) * (th - sin(th));}
+    double dis(const Circle &c) const {return (o - c.o).len();}
+
+    // -2: 内含 (d < R - r) // -1: 内切 (d = R - r)
+    //  0: 相交 (R - r < d < R + r)
+    //  1: 外切 (d = R + r) //  2: 外离 (d > R + r)
+    int pos(const Circle &c) const {
+		double d = dis(c);
+        int pd1 = sign(d - fabs(r - c.r)), pd2 = sign(d - (r + c.r));
+        return pd1<0? -2 : pd1==0? -1 : pd2==0? 1 : pd2>0? 2 : 0;
+	}
+
+    // 两圆相交弦，满足两圆相交
+    // 返回此圆上逆时针
+    // TODO:
+    Line chord(const Circle &c) const {
+        Point v = c.o - o;
+        double th = _acos((pow2(r) + v.len2() - pow2(c.r)) / (2 * r * v.len()));
+        return Line(v.L(th).e() * r + o, v.R(th).e() * r + o);
+    }
+
+    // 两圆相切交点
+    // _d = 0 切线不交叉，须满足相交、外切或外离
+    // _d = 1 切线交叉，须满足外离
+    // 返回圆上逆时针
+    // TODO:
+    Line tangent_points(const Circle &c, const int &_d) const {
+        Point  v = c.o - o;
+        double th = _acos((_d&0x1 ? r+c.r : r-c.r) / v.len());
+        return Line(v.R(th).e() * r + o, v.L(th).e() * r + o);
+    }
+
+    // 两圆切线单位向量
+    // _d = 0 切线不交叉，须满足相交、外切或外离
+    // _d = 1 切线交叉，须满足外离
+    // 返回起点逆时针
+    Line tangent_vector(const Circle &c, const int &_d) const {
+        Point v = c.o - o;
+        double th = _asin((_d&0x1 ? r+c.r : r-c.r) / v.len());
+        return Line(v.R(th).e(), v.L(th).e());
+    }
+
+    void get()   {o.get(); cin >> r;}
+    void print() {cout << "Circle:" << endl; cout << " `--"; o.print(); cout << " `--R: " << r << endl;}
+};
+
+
+// -PI <= th <= PI
+struct Range {
+    double th;
+    int    t;
+    Range(double th = 0, int t = 0) : th(th), t(t) {}
+    bool operator <(const Range &s) const {return sign(th - s.th) < 0 || (sign(th - s.th) == 0 && t > s.t);}
+};
+
+
+// 圆环区间
+struct Ranges {
+    int nc;
+    vector<Range> R;
+    Ranges() {clear();}
+    void clear() {nc = 0; R.clear();}
+    
+    void add(double th, int     t) {R.push_back(Range(th, t));}
+    void add(double st, double ed) {st = fix(st); ed = fix(ed); if (sign(st - ed) > 0) ++ nc; add(st, 1); add(ed, -1);}
+    void add(Point  st, Point  ed) {add(atan2(st.y, st.x), atan2(ed.y, ed.x));}
+    void add(Line l) {add(l.a, l.b);}
+    
+    void run() {sort(R.begin(), R.end());}
+    
+    int get_max() {
+        int r = nc;
+        double pj = - PI;
+        for(int j = 0; j < R.size(); ++ j) {
+            nc += R[j].t; pj  = R[j].th;
+            r = max(r, nc);
+        }
+        return r;
+    }
+};
+
+
+// 平面一直线最多能与几个圆相交 （建立在最优直线可为一圆切线推论下）
+int a_line_cut_circle(vector<Circle> &C)
+{
+    int n = C.size();
+    int ans = 0;
+    Ranges R;
+    for (int i = 0; i < n; ++ i)
+    {
+        int cnt = 0;
+        R.clear();
+        for (int j = 0; j < n; ++ j)
+        {
+            if (j == i) continue;
+            
+            int pd = C[i].pos(C[j]);
+            if (pd == -2 || pd == -1) { // 包含
+                if (sign(C[i].r - C[j].r) <= 0) ++ cnt;
+                continue;
+            }
+
+            // // A more fater version
+            // Point  v = C[j].o - C[i].o;
+            // double d = v.len();
+            // double th_ji = atan2( v.y,  v.x);
+            // double th_ij = atan2(-v.y, -v.x);
+            // double vt1 = asin((C[i].r + C[j].r) / d);
+            // double vt2 = asin((C[i].r - C[j].r) / d);
+            
+            // if (pd == 0 || pd == 1) // 相交
+            //     R.add(th_ij + vt2, th_ji - vt2);
+            // else // 相离
+            // {
+            //     R.add(th_ji - vt1, th_ji - vt2);
+            //     R.add(th_ij + vt2, th_ij + vt1);
+            // }
+            // // End of it
+
+            Line v1 = C[i].tangent_vector(C[j], 0);
+            Line v2 = C[i].tangent_vector(C[j], 1);
+            if (pd == 0 || pd == 1) // 相交
+                R.add(v1.a, -v1.b);
+            else // 相离
+            {
+                R.add(v1.a, v2.a);
+                R.add(-v2.b, -v1.b);
+            }
+        }
+        
+        R.run();
+        cnt += R.get_max();
+        ans = max(ans, cnt);
+    }
+
+    return ans + 1;
+}
+
+int main(int argc, char *argv[])
+{
+    int t;
+    cin >> t;
+    for (int cas = 1; cas <= t; ++ cas)
+    {
+        int n;
+        cin >> n;
+        vector<Circle> C(n);
+        for (int i = 0; i < n; ++ i)
+            C[i].get();
+
+        int ans = a_line_cut_circle(C);
+
+        cout << "Case #" << cas << ": ";
+        cout << ans << endl;
+    }
+    return 0;
+}
+#+END_SRC
+
+
++ [[http://acm.sgu.ru/problem.php?contest=0&problem=435][SGU/435 - UFO Circles]]
+  - Q: 多圆并，求交了奇数次的面积和偶数次的面积
+  - A: 本质是多圆并交k次的面积问题。
+
+SPOJ/CIRU VCIRCLES
+#+BEGIN_SRC cpp
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#include <cmath>
+using namespace std;
+
+const double EPS = 1e-8;
+const double PI  = acos(-1.0);
+const double TAU = 2.0 * PI;
+const double INF = 1e99;
+
+int sig(double x) {return x < -EPS ? -1 : x > EPS ? 1 : 0;}
+template<class T> T pow2(T x) {return x * x;}
+
+
+class Vector {
+public:
+    double x, y;
+    Vector() {}
+    Vector(double x, double y): x(x), y(y) {}
+    
+    Vector operator -() const {return Vector(-x, -y);}
+    Vector operator +(const Vector &v) const {return Vector(x+v.x, y+v.y);}
+    Vector operator -(const Vector &v) const {return Vector(x-v.x, y-v.y);}
+    Vector operator *(const double &s) const {return Vector(x * s, y * s);}
+    Vector operator /(const double &s) const {return Vector(x / s, y / s);}
+
+    double operator *(const Vector &v) const {return x*v.x + y*v.y;}
+    double operator ^(const Vector &v) const {return x*v.y - y*v.x;}
+
+    // rotate vector (Right/Left hand)
+    Vector  R(double co, double si) {return Vector(x*co-y*si, y*co+x*si);}
+    Vector  L(double co, double si) {return Vector(x*co+y*si, y*co-x*si);}
+    Vector  R(double th) {return R(cos(th), sin(th));}
+    Vector  L(double th) {return L(cos(th), sin(th));}
+
+    double len2() {return x*x + y*y;}
+    double len()  {return sqrt(len2());}
+    double ang()  {return atan2(y, x);}  // angle of vector
+    Vector e(double s = 1.0) {return *this / len() * s;}
+};
+typedef Vector Point;
+
+
+class Line {
+public:
+    Point a, b;
+    Line() {}
+    Line(Point a, Point b): a(a), b(b) {}
+};
+
+class Circle {
+public:
+    Point o;
+    double r;
+    Circle() {}
+    Circle(Point o, double r): o(o), r(r) {}
+    
+    // interior          (d < R - r)         ----> -2
+    // interior tangents (d = R - r)         ----> -1
+    // concentric        (d = 0)
+    // secants           (R - r < d < R + r) ---->  0
+    // exterior tangents (d = R + r)         ---->  1
+    // exterior          (d > R + r)         ---->  2
+    int posi(Circle c) {
+        double d = (o - c.o).len();
+        int in = sig(d - fabs(r - c.r)), ex = sig(d - (r + c.r));
+        return in<0 ? -2 : in==0? -1 : ex==0 ? 1 : ex>0? 2 : 0;
+    }
+
+    // IMPORTANT: Ensure this->posi(c) = 0
+    // chord(弦) of two circle
+    // two points is ccw in *this circle
+    Line chord(Circle c) {
+        Vector v = c.o - o;
+        double co = (pow2(r) + v.len2() - pow2(c.r)) / (2 * r * v.len());
+        double si = sqrt(fabs(1.0 - pow2(co)));
+        return Line(v.L(co, si).e(r) + o, v.R(co, si).e(r) + o);
+    }
+};
+
+
+// -PI <= th <= PI
+struct Range {
+    double t;
+    int evt;
+    Point p;
+    Range() {}
+    Range(double t, int evt, Point p) : t(t), evt(evt), p(p) {}
+
+    bool operator <(const Range &s) const {
+        return sig(t - s.t) < 0 || (sig(t - s.t) == 0 && evt > s.evt);
+    }
+};
+
+
+// 圆并返回交了k次的面积
+// http://hi.baidu.com/aekdycoin/item/b8ff6adc73c0e71dd78ed0d6
+// http://www.zhongsisi.com/solving-simple-polygons/
+
+const int MAX_N = 1000 + 10;
+Circle C[MAX_N];
+Range R[MAX_N<<1];
+// sort circle with desending of radii
+bool cmp_r(const Circle &a, const Circle &b) {
+    return a.r > b.r;
+}
+// Area of circular segment(弓形)
+double segment_area(double r, double t) {
+    return pow2(r) * (t - sin(t)) / 2;
+}
+double union_circle(Circle C[], int &n)
+{
+    sort(C, C + n, cmp_r);
+    int k = 0;
+    for (int i = 0; i < n; i++) {
+        if (sig(C[i].r) == 0) break;
+        int j = 0;
+        for (j = 0; j < k; j++)
+            if (C[i].posi(C[j]) < 0 || !sig((C[i].o - C[j].o).len()))
+                break;
+        if (j == k)
+            C[k++] = C[i];
+    }
+    n = k;
+    
+    double ans = 0;
+    for (int i = 0; i < n; ++ i)
+    {
+        Point mpi = Point(- C[i].r, 0.0) + C[i].o;
+        int nc = 0, rcnt = 0;
+        R[rcnt++] = Range(-PI,  1, mpi);
+        R[rcnt++] = Range( PI, -1, mpi);
+        for (int j = 0; j < n; ++ j)
+        {
+            if (j == i || C[i].posi(C[j])) continue;
+
+            Line l = C[i].chord(C[j]);
+            double jR = (l.a - C[i].o).ang(), jL = (l.b - C[i].o).ang();
+
+            if (sig(jR - jL) > 0) ++ nc;
+            R[rcnt++] = Range(jR,  1, l.a);
+            R[rcnt++] = Range(jL, -1, l.b);
+        }
+        sort(R, R + rcnt);
+
+        double pj = - PI;
+        Point  pp = mpi;
+        for(int j = 0; j < rcnt; ++ j)
+        {
+            nc += R[j].evt;
+            if((nc == 2 && R[j].evt > 0) || nc == 0)
+                ans += segment_area(C[i].r, R[j].t - pj) + (pp ^ R[j].p) / 2;
+            pj = R[j].t; pp = R[j].p;
+        }
+    }
+    return ans;
+}
+
+int main(int argc, char *argv[])
+{
+    int n;
+    while (scanf("%d", &n) != EOF) {
+        for (int i = 0; i < n; i++)
+            scanf("%lf%lf%lf", &C[i].o.x, &C[i].o.y, &C[i].r);
+
+        double ans = union_circle(C, n);
+        printf("%.5lf\n", ans);
+    }
+    return 0;
+}
+#+END_SRC
+
+SPOJ/ CIRUT
+#+BEGIN_SRC cpp
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#include <cmath>
+using namespace std;
+
+const double EPS = 1e-8;
+const double PI  = acos(-1.0);
+const double TAU = 2.0 * PI;
+const double INF = 1e99;
+
+int sig(double x) {return x < -EPS ? -1 : x > EPS ? 1 : 0;}
+template<class T> T pow2(T x) {return x * x;}
+
+
+class Vector {
+public:
+    double x, y;
+    Vector() {}
+    Vector(double x, double y): x(x), y(y) {}
+    
+    Vector operator -() const {return Vector(-x, -y);}
+    Vector operator +(const Vector &v) const {return Vector(x+v.x, y+v.y);}
+    Vector operator -(const Vector &v) const {return Vector(x-v.x, y-v.y);}
+    Vector operator *(const double &s) const {return Vector(x * s, y * s);}
+    Vector operator /(const double &s) const {return Vector(x / s, y / s);}
+
+    double operator *(const Vector &v) const {return x*v.x + y*v.y;}
+    double operator ^(const Vector &v) const {return x*v.y - y*v.x;}
+
+    // rotate vector (Right/Left hand)
+    Vector  R(double co, double si) {return Vector(x*co-y*si, y*co+x*si);}
+    Vector  L(double co, double si) {return Vector(x*co+y*si, y*co-x*si);}
+    Vector  R(double th) {return R(cos(th), sin(th));}
+    Vector  L(double th) {return L(cos(th), sin(th));}
+
+    double len2() {return x*x + y*y;}
+    double len()  {return sqrt(len2());}
+    double ang()  {return atan2(y, x);}  // angle of vector
+    Vector e(double s = 1.0) {return *this / len() * s;}
+};
+typedef Vector Point;
+
+
+class Line {
+public:
+    Point a, b;
+    Line() {}
+    Line(Point a, Point b): a(a), b(b) {}
+};
+
+class Circle {
+public:
+    Point o;
+    double r;
+    Circle() {}
+    Circle(Point o, double r): o(o), r(r) {}
+    
+    // interior          (d < R - r)         ----> -2
+    // interior tangents (d = R - r)         ----> -1
+    // concentric        (d = 0)
+    // secants           (R - r < d < R + r) ---->  0
+    // exterior tangents (d = R + r)         ---->  1
+    // exterior          (d > R + r)         ---->  2
+    int posi(Circle c) {
+        double d = (o - c.o).len();
+        int in = sig(d - fabs(r - c.r)), ex = sig(d - (r + c.r));
+        return in<0 ? -2 : in==0? -1 : ex==0 ? 1 : ex>0? 2 : 0;
+    }
+
+    // IMPORTANT: Ensure this->posi(c) = 0
+    // chord(弦) of two circle
+    // two points is ccw in *this circle
+    Line chord(Circle c) {
+        Vector v = c.o - o;
+        double co = (pow2(r) + v.len2() - pow2(c.r)) / (2 * r * v.len());
+        double si = sqrt(fabs(1.0 - pow2(co)));
+        return Line(v.L(co, si).e(r) + o, v.R(co, si).e(r) + o);
+    }
+};
+
+
+// -PI <= th <= PI
+struct Range {
+    double t;
+    int evt;
+    Point p;
+    Range() {}
+    Range(double t, int evt, Point p) : t(t), evt(evt), p(p) {}
+
+    bool operator <(const Range &s) const {
+        return sig(t - s.t) < 0 || (sig(t - s.t) == 0 && evt > s.evt);
+    }
+};
+
+
+// 圆并返回交了k次的面积
+// http://hi.baidu.com/aekdycoin/item/b8ff6adc73c0e71dd78ed0d6
+// http://www.zhongsisi.com/solving-simple-polygons/
+
+const int MAX_N = 1000 + 10;
+Circle C[MAX_N];
+Range R[MAX_N<<1];
+double area[MAX_N];
+// sort circle with desending of radii
+bool cmp_r(const Circle &a, const Circle &b) {
+    return a.r > b.r;
+}
+// Area of circular segment(弓形)
+double segment_area(double r, double t) {
+    return pow2(r) * (t - sin(t)) / 2;
+}
+double union_circle(Circle C[], int &n, double *area)
+{
+    sort(C, C + n, cmp_r);
+    for (int i = 0; i <= n; i++) area[i] = 0;
+    for (int i = 0; i < n; i++)
+    {
+        Point mpi = Point(- C[i].r, 0.0) + C[i].o;
+        int nc = 0, rcnt = 0;
+        R[rcnt++] = Range(-PI,  1, mpi);
+        R[rcnt++] = Range( PI, -1, mpi);
+        for (int j = 0; j < n; ++ j)
+        {
+            if (j == i) continue;
+
+            int pd = C[i].posi(C[j]);
+            if (pd == 1 || pd == 2) continue; // 外切或外离
+            if (pd == -2 || pd == -1) { // 内含或内切
+                if(sig(C[j].r - C[i].r) > 0) nc++;
+                continue;
+            }
+
+            Line l = C[i].chord(C[j]);
+            double jR = (l.a - C[i].o).ang(), jL = (l.b - C[i].o).ang();
+
+            if (sig(jR - jL) > 0) ++ nc;
+            R[rcnt++] = Range(jR,  1, l.a);
+            R[rcnt++] = Range(jL, -1, l.b);
+        }
+        sort(R, R + rcnt);
+
+        double pj = - PI;
+        Point  pp = mpi;
+        for(int j = 0; j < rcnt; ++ j)
+        {
+            double ts = segment_area(C[i].r, R[j].t - pj) + (pp ^ R[j].p) / 2;
+            area[nc  ] += ts;
+            area[nc-1] -= ts;
+            nc += R[j].evt;
+            pj = R[j].t; pp = R[j].p;
+        }
+    }
+}
+
+
+int main(int argc, char *argv[])
+{
+    int n;
+    while (cin >> n)
+    {
+        for (int i = 0; i < n; ++ i)
+            scanf("%lf%lf%lf", &C[i].o.x, &C[i].o.y, &C[i].r);
+
+        union_circle(C, n, area);
+
+        for (int i = 1; i <= n; i++)
+            printf("[%d] = %.3lf\n", i, area[i]);
+    }
+    return 0;
+}
+#+END_SRC
+
+UVALive/4492 HDU/3239
+#+BEGIN_SRC cpp
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#include <cmath>
+using namespace std;
+
+const double EPS = 1e-8;
+const double PI  = acos(-1.0);
+const double TAU = 2.0 * PI;
+const double INF = 1e99;
+
+int sig(double x) {return x < -EPS ? -1 : x > EPS ? 1 : 0;}
+template<class T> T pow2(T x) {return x * x;}
+
+
+class Vector {
+public:
+    double x, y;
+    Vector() {}
+    Vector(double x, double y): x(x), y(y) {}
+    
+    Vector operator -() const {return Vector(-x, -y);}
+    Vector operator +(const Vector &v) const {return Vector(x+v.x, y+v.y);}
+    Vector operator -(const Vector &v) const {return Vector(x-v.x, y-v.y);}
+    Vector operator *(const double &s) const {return Vector(x * s, y * s);}
+    Vector operator /(const double &s) const {return Vector(x / s, y / s);}
+
+    double operator *(const Vector &v) const {return x*v.x + y*v.y;}
+    double operator ^(const Vector &v) const {return x*v.y - y*v.x;}
+
+    // rotate vector (Right/Left hand)
+    Vector  R(double co, double si) {return Vector(x*co-y*si, y*co+x*si);}
+    Vector  L(double co, double si) {return Vector(x*co+y*si, y*co-x*si);}
+    Vector  R(double th) {return R(cos(th), sin(th));}
+    Vector  L(double th) {return L(cos(th), sin(th));}
+
+    double len2() {return x*x + y*y;}
+    double len()  {return sqrt(len2());}
+    double ang()  {return atan2(y, x);}  // angle of vector
+    Vector e(double s = 1.0) {return *this / len() * s;}
+};
+typedef Vector Point;
+
+
+class Line {
+public:
+    Point a, b;
+    Line() {}
+    Line(Point a, Point b): a(a), b(b) {}
+};
+
+class Circle {
+public:
+    Point o;
+    double r;
+    Circle() {}
+    Circle(Point o, double r): o(o), r(r) {}
+    
+    // interior          (d < R - r)         ----> -2
+    // interior tangents (d = R - r)         ----> -1
+    // concentric        (d = 0)
+    // secants           (R - r < d < R + r) ---->  0
+    // exterior tangents (d = R + r)         ---->  1
+    // exterior          (d > R + r)         ---->  2
+    int posi(Circle c) {
+        double d = (o - c.o).len();
+        int in = sig(d - fabs(r - c.r)), ex = sig(d - (r + c.r));
+        return in<0 ? -2 : in==0? -1 : ex==0 ? 1 : ex>0? 2 : 0;
+    }
+
+    // IMPORTANT: Ensure this->posi(c) = 0
+    // chord(弦) of two circle
+    // two points is ccw in *this circle
+    Line chord(Circle c) {
+        Vector v = c.o - o;
+        double co = (pow2(r) + v.len2() - pow2(c.r)) / (2 * r * v.len());
+        double si = sqrt(fabs(1.0 - pow2(co)));
+        return Line(v.L(co, si).e(r) + o, v.R(co, si).e(r) + o);
+    }
+};
+
+
+// -PI <= th <= PI
+struct Range {
+    double t;
+    int evt;
+    Point p;
+    Range() {}
+    Range(double t, int evt, Point p) : t(t), evt(evt), p(p) {}
+
+    bool operator <(const Range &s) const {
+        return sig(t - s.t) < 0 || (sig(t - s.t) == 0 && evt > s.evt);
+    }
+};
+
+
+// 圆并返回交了k次的面积
+// http://hi.baidu.com/aekdycoin/item/b8ff6adc73c0e71dd78ed0d6
+// http://www.zhongsisi.com/solving-simple-polygons/
+
+const int MAX_N = 1000 + 10;
+Circle C[MAX_N];
+Range R[MAX_N<<1];
+double area[MAX_N];
+// sort circle with desending of radii
+bool cmp_r(const Circle &a, const Circle &b) {
+    return a.r > b.r;
+}
+// Area of circular segment(弓形)
+double segment_area(double r, double t) {
+    return pow2(r) * (t - sin(t)) / 2;
+}
+void union_circle(Circle C[], int &n, double *area)
+{
+    sort(C, C + n, cmp_r);
+    // 因为问题只须要将圆并的面积减圆交的面积，因为
+    // 因此特殊处理，将重复的圆去掉
+    int k = 0;
+    for (int i = 0; i < n; i++) {
+        if (sig(C[i].r) == 0) break;
+        int j = 0;
+        for (; j < k; j++)
+            if (sig(C[i].r - C[j].r) == 0 && sig((C[i].o - C[j].o).len()) == 0)
+                break;
+        if (j == k)
+            C[k++] = C[i];
+    }
+    n = k;
+    for (int i = 0; i <= n; i++) area[i] = 0;
+    for (int i = 0; i < n; i++)
+    {
+        Point mpi = Point(- C[i].r, 0.0) + C[i].o;
+        int nc = 0, rcnt = 0;
+        R[rcnt++] = Range(-PI,  1, mpi);
+        R[rcnt++] = Range( PI, -1, mpi);
+        for (int j = 0; j < n; ++ j)
+        {
+            if (j == i) continue;
+
+            int pd = C[i].posi(C[j]);
+            if (pd == 1 || pd == 2) continue; // 外切或外离
+            if (pd == -2 || pd == -1) { // 内含或内切
+                if(sig(C[j].r - C[i].r) > 0) nc++;
+                continue;
+            }
+
+            Line l = C[i].chord(C[j]);
+            double jR = (l.a - C[i].o).ang(), jL = (l.b - C[i].o).ang();
+
+            if (sig(jR - jL) > 0) ++ nc;
+            R[rcnt++] = Range(jR,  1, l.a);
+            R[rcnt++] = Range(jL, -1, l.b);
+        }
+        sort(R, R + rcnt);
+
+        double pj = - PI;
+        Point  pp = mpi;
+        for(int j = 0; j < rcnt; ++ j)
+        {
+            double ts = segment_area(C[i].r, R[j].t - pj) + (pp ^ R[j].p) / 2;
+            area[nc  ] += ts;
+            area[nc-1] -= ts;
+            nc += R[j].evt;
+            pj = R[j].t; pp = R[j].p;
+        }
+    }
+}
+
+
+int main(int argc, char *argv[])
+{
+    int cas = 1;
+    int a[8];
+    while (true) {
+        int zc = 0;
+        for (int i = 0; i < 8; i ++) {
+            scanf("%d", &a[i]);
+            if (a[i] == 0)
+                zc++;
+        }
+        if (zc == 8)
+            break;
+
+        Point p[4];
+        for (int i = 0; i <= 3; i++)
+            p[i] = Point((double)a[i<<1], (double)a[i<<1|1]);
+
+        Circle c[4];
+        int k = 0;
+        for (int i = 0; i <= 1; i++)
+            for (int j = 2; j <= 3; j++)
+                c[k++] = Circle((p[i] + p[j]) / 2, (p[i] - p[j]).len() / 2);
+
+        int n = 4;
+        union_circle(c, n, area);
+
+        double ans = 0;
+        for (int i = 1; i <= n - 1; i++)
+            ans += area[i];
+
+        printf("Case %d: %.3lf\n\n", cas++, ans);
+    }
+    return 0;
+}
+#+END_SRC
+
+UVALive/4530
+#+BEGIN_SRC cpp
+#include <set>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <cstdio>
+#include <cmath>
+using namespace std;
+
+const double EPS = 1e-8;
+const double PI  = acos(-1.0);
+const double TAU = 2.0 * PI;
+const double INF = 1e99;
+
+int sig(double x) {return x < -EPS ? -1 : x > EPS ? 1 : 0;}
+template<class T> T pow2(T x) {return x * x;}
+
+
+class Vector {
+public:
+    double x, y;
+    Vector() {}
+    Vector(double x, double y): x(x), y(y) {}
+    
+    Vector operator -() const {return Vector(-x, -y);}
+    Vector operator +(const Vector &v) const {return Vector(x+v.x, y+v.y);}
+    Vector operator -(const Vector &v) const {return Vector(x-v.x, y-v.y);}
+    Vector operator *(const double &s) const {return Vector(x * s, y * s);}
+    Vector operator /(const double &s) const {return Vector(x / s, y / s);}
+
+    double operator *(const Vector &v) const {return x*v.x + y*v.y;}
+    double operator ^(const Vector &v) const {return x*v.y - y*v.x;}
+
+    // rotate vector (Right/Left hand)
+    Vector  R(double co, double si) {return Vector(x*co-y*si, y*co+x*si);}
+    Vector  L(double co, double si) {return Vector(x*co+y*si, y*co-x*si);}
+    Vector  R(double th) {return R(cos(th), sin(th));}
+    Vector  L(double th) {return L(cos(th), sin(th));}
+
+    double len2() {return x*x + y*y;}
+    double len()  {return sqrt(len2());}
+    double ang()  {return atan2(y, x);}  // angle of vector
+    Vector e(double s = 1.0) {return *this / len() * s;}
+};
+typedef Vector Point;
+
+
+class Line {
+public:
+    Point a, b;
+    Line() {}
+    Line(Point a, Point b): a(a), b(b) {}
+};
+
+class Circle {
+public:
+    Point o;
+    double r;
+    Circle() {}
+    Circle(Point o, double r): o(o), r(r) {}
+    
+    // interior          (d < R - r)         ----> -2
+    // interior tangents (d = R - r)         ----> -1
+    // concentric        (d = 0)
+    // secants           (R - r < d < R + r) ---->  0
+    // exterior tangents (d = R + r)         ---->  1
+    // exterior          (d > R + r)         ---->  2
+    int posi(Circle c) {
+        double d = (o - c.o).len();
+        int in = sig(d - fabs(r - c.r)), ex = sig(d - (r + c.r));
+        return in<0 ? -2 : in==0? -1 : ex==0 ? 1 : ex>0? 2 : 0;
+    }
+
+    // IMPORTANT: Ensure this->posi(c) = 0
+    // chord(弦) of two circle
+    // two points is ccw in *this circle
+    Line chord(Circle c) {
+        Vector v = c.o - o;
+        double co = (pow2(r) + v.len2() - pow2(c.r)) / (2 * r * v.len());
+        double si = sqrt(fabs(1.0 - pow2(co)));
+        return Line(v.L(co, si).e(r) + o, v.R(co, si).e(r) + o);
+    }
+};
+
+
+// -PI <= th <= PI
+struct Range {
+    double t;
+    int evt, id;
+    Range() {}
+    Range(double t, int evt, int id) : t(t), evt(evt), id(id) {}
+
+    bool operator <(const Range &s) const {
+        return sig(t - s.t) < 0 || (sig(t - s.t) == 0 && evt > s.evt);
+    }
+};
+
+
+// 圆并返回交了k次的面积
+// http://hi.baidu.com/aekdycoin/item/b8ff6adc73c0e71dd78ed0d6
+// http://www.zhongsisi.com/solving-simple-polygons/
+
+const int MAX_N = 1100 + 10;
+Circle C[MAX_N];
+Range R[MAX_N<<1];
+int mx;
+set<set<int> > st;
+// sort circle with desending of radii
+bool cmp_r(const Circle &a, const Circle &b) {
+    return a.r > b.r;
+}
+// Area of circular segment(弓形)
+double segment_area(double r, double t) {
+    return pow2(r) * (t - sin(t)) / 2;
+}
+void union_circle(Circle C[], int &n)
+{
+    sort(C, C + n, cmp_r);
+    
+    mx = -1; st.clear();
+    for (int i = 0; i < n; i++)
+    {
+        int nc = 0, rcnt = 0;
+        set<int> tst;
+        tst.insert(i);
+        for (int j = 0; j < n; ++ j)
+        {
+            if (j == i) continue;
+
+            int pd = C[i].posi(C[j]);
+            if (pd == 1 || pd == 2) // 外切或外离
+            {
+                if (pd == 1) {
+                    double ag = (C[j].o - C[i].o).ang();
+                    R[rcnt++] = Range(ag,  1, j);
+                    R[rcnt++] = Range(ag, -1, j);
+                }
+                continue;
+            }
+            if (pd == -2 || pd == -1) { // 内含或内切
+                if (j > i) {
+                    R[rcnt++] = Range(-PI,  1, j);
+                    R[rcnt++] = Range( PI, -1, j);
+                }
+                continue;
+            }
+
+            Line l = C[i].chord(C[j]);
+            double jR = (l.a - C[i].o).ang(), jL = (l.b - C[i].o).ang();
+
+            if (sig(jR - jL) > 0) {
+                R[rcnt++] = Range(-PI,  1, j);
+                R[rcnt++] = Range( PI, -1, j);
+            }
+            
+            R[rcnt++] = Range(jR,  1, j);
+            R[rcnt++] = Range(jL, -1, j);
+        }
+        sort(R, R + rcnt);
+
+        double pj = - PI;
+        for(int j = 0; j < rcnt; ++ j)
+        {
+            if (nc > mx) {
+                mx = nc; st.clear();
+            }
+            
+            if (nc == mx)
+                st.insert(tst);
+            
+            nc += R[j].evt;
+            pj = R[j].t;
+            if (R[j].evt == 1)
+                tst.insert(R[j].id);
+            else
+                tst.erase(R[j].id);
+        }
+    }
+}
+
+
+int main(int argc, char *argv[])
+{
+    int t;
+    scanf("%d", &t);
+    while (t--) {
+        double r;
+        int n;
+        scanf("%lf%d", &r, &n);
+        for (int i = 0; i < n; i++) {
+            scanf("%lf%lf", &C[i].o.x, &C[i].o.y);
+            C[i].r = r;
+        }
+        
+        union_circle(C, n);
+
+        printf("%d %d\n", mx + 1, (int)st.size());
+    }
+    printf("\n"); // very very very big trick!!!
+    return 0;
+}
+
+#+END_SRC
+
+圆与多边形交
+POJ/2986,3675,ZOJ/2675,HDU/4404
+
++ [[http://poj.org/problem?id=4048][POJ/4048 - Chinese Repeating Crossbow]]
+  - Q: 由一起点发射的射线最多交多少线段
+  - A: 转化为角度（斜率）
+#+BEGIN_SRC cpp
+#include <cstdio>
+#include <cmath>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+#define pow2(x) ((x)*(x))
+
+const double EPS = 1e-6;
+const double PI  = acos(-1.0);
+
+int sign(double x) {return x < - EPS ? -1 : x > EPS ? 1 : 0;}
+
+struct Point {
+    double x, y;
+    Point  operator +(const Point  &p) const {return (Point){x+p.x, y+p.y};}
+    Point  operator -(const Point  &p) const {return (Point){x-p.x, y-p.y};}
+    Point  operator *(const double &s) const {return (Point){x*s, y*s};}
+    Point  operator /(const double &s) const {return (Point){x/s, y/s};}
+    
+    double operator ^(const Point  &p) const {return x*p.y - y*p.x;}
+    double operator *(const Point  &p) const {return x*p.x + y*p.y;}
+    
+    double length2() {return x*x + y*y;}
+    double length()  {return sqrt(length2());}
+    Point  e()       {return (Point){x/length(), y/length()};}
+    void   get()     {cin >> x >> y;}
+};
+
+struct Range {
+    double th;
+    int    t;
+    bool   operator <(const Range &s) const {return sign(th - s.th) < 0 || (sign(th - s.th) == 0 && t > s.t);}
+};
+
+
+int main(int argc, char *argv[])
+{
+    int t;
+    cin >> t;
+    while (t--)
+    {
+        int n;
+        cin >> n;
+        vector<pair<Point, Point> > L(n);
+        for (int i = 0; i < n; ++ i)
+        {
+            L[i].first.get();
+            L[i].second.get();
+        }
+        Point o;
+        o.get();
+
+        vector<Range> S;
+        
+        int nc = 0;
+        for (int j = 0; j < n; ++ j)
+        {
+            pair<Point, Point> ps = L[j];
+            Point a = ps.first, b = ps.second;
+            a = (a - o).e(); b = (b - o).e();
+            int rd = sign(b ^ a);
+            if (rd == 0 && sign(b * a) <= 0)
+            {
+                ++ nc;
+                continue;
+            }
+            else if (rd < 0)
+                swap(a, b);
+
+            double jL = atan2(a.y, a.x), jR = atan2(b.y, b.x);
+            
+            if(sign(jR - jL) > 0) ++ nc;
+            S.push_back((Range){jL, -1});
+            S.push_back((Range){jR,  1});
+        }
+        sort(S.begin(), S.end());
+
+        int ans = 0;
+        double pj = - PI;
+        for(int j = 0; j < S.size(); ++ j)
+        {
+            ans = max(ans, nc);
+            nc += S[j].t;
+        }
+        ans = max(ans, nc);
+        
+        cout << ans << endl;
+    }
+    return 0;
+}
+#+END_SRC
+
++ [[http://poj.org/problem?id=2986][POJ/2986 - A Triangle and a Circle]] or [[http://poj.org/problem?id=3675][POJ/3675 - Telescope]] or [[http://acm.zju.edu.cn/onlinejudge/showProblem.do?problemCode=2675][ZOJ/2675 - Little Mammoth]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=4404][HDU/4404 - Worms]]
+  - A: 圆与简单多边形相交面积问题
+
+UVA/11978 LightOJ/1358
+
+
+HDU/3007 ZOJ/1450 最小圆覆盖
+
+* 三角形问题
+
++ [[http://acm.fzu.edu.cn/problem.php?pid=1973][FZU/1973 - How many stars]]
+  - Q: 平面n点，m次询问，每次询问任意三点三角形中点的个数
+  - A: 预处理以任意点为中心每个点从(-INF,0)开始旋转的点的个数，之后作差即可知道任意三点旋转角中点的个数，
+       最后可拼接出三点中点的个数（类似面积处理）
+    
+* 三维凸包
+
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4266][HDU/4266 - The Worm in the Apple]]
+  - Q: 一空间凸多面体中一点距其表面最近距离
+  - A: 求空间凸包，枚举各面与点距离
+HDU/3662
+
+* 其他题目
+
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=3685][HDU/3685 - Rotational Painting]]
+  - Q: 问一多边形竖放能立起的方法数
+  - A: 等价于将多边形做凸包，有多少边在重心相对位置的两边
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3008][UVALive/5007 - Detector Placement]] or [[http://acm.hdu.edu.cn/showproblem.php?pid=3712][HDU/3712 - Detector Placement]] or [[http://acm.zju.edu.cn/onlinejudge/showProblem.do?problemCode=3419][ZOJ/3419 - Detector Placement]]
+  - Q: 一点光源朝一个方向发射，平面上有一三棱镜（折射率u），问最终光在x轴上的交点。
+  - A: 硬做，处理向量旋转
++ [[http://acm.hdu.edu.cn/showproblem.php?pid=4401][HDU/4401 - Battery]]
+  - Q: 一线段（太阳能电池）上有n个杆子，位置在线段上a1,a2...an，高度分别为h1,h2...hn，太阳从t1时间到t2时间，获得的电能
+       若一时刻太阳与地面夹角为th，则单位长度，单位时间获得的电能为sin(th)
+  - A: 做好上凸包后，分段积分。
++ [[http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1066][Aizu/1066 - Legend of Storia]]
+  - Q: 一简单多边形内切于一圆中滚动，问滚Q次，每次的支点座标
+  - A: 直接做（模拟）
++ [[http://livearchive.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&category=514&page=show_problem&problem=3978][UVALive/5967 - The Falling Circle]]
+  - A: 求两圆切线，各种处理
+
+* 计算几何2
+
+#+begin_src latex
+\subsection{圆并/交}
+\subsubsection{SPOJ/CIRU,VCIRCLES}
+多圆面积并的面积
+\cgeo{2D.d/undering/circle-union/SPOJ-CIRU-VCIRCLES.cc}
+\subsubsection{SPOJ/CIRUT}
+扩展圆并，求交了k次的面积
+\cgeo{2D.d/undering/circle-union/SPOJ-CIRUT.cc}
+\subsubsection{SGU/435}
+求交了奇数次和偶数次的面积
+\cgeo{2D.d/undering/circle-union/SGU-435.cc}
+\subsubsection{CII/4492,HDU/3239}
+求圆并减去圆交，trick:要去除相同的圆
+然后求去除相同圆后k个圆的交
+\cgeo{2D.d/undering/circle-union/CII-4492-HDU-3239.cc}
+\subsubsection{CII/4530}
+求最多几个圆相交于一块区域，以及区域的块数
+\cgeo{2D.d/undering/circle-union/CII-4530.cc}
+#+end_src
