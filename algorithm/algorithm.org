@@ -2,14 +2,16 @@
 #+OPTIONS: num:t toc:t \n:nil LaTeX:t
 #+MATHJAX: align:"left"
 
-* Divide & Conquer
-
-[[file:divide_and_conquer.org][SEE MORE]]
+* [[file:divide_and_conquer.org][Divide & Conquer]]
 
 * right-to-left binary method
+
 ** right-to-left binary exponentiation
+
 http://primes.utm.edu/glossary/xpage/BinaryExponentiation.html
+
 ** Fast Fibonacci
+
 #+begin_src cpp
 #include <iostream>
 #define mod 10000
@@ -43,17 +45,21 @@ int main() {
 + [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3914][UVA/12470 - Tribonacci]]
   - A: 矩阵连乘Fibonacci扩展。
 
-* Number Theory
-
-[[file:number_theory.org][SEE MORE]]
+* [[file:number_theory.org][Number Theory]]
 
 * 组合数学
-- http://blog.himdd.com/?cat=69
+
+see ->  http://blog.himdd.com/?cat=69
+
 ** 错排问题的递推解决
-- http://blog.pfan.cn/cruxd/17413.html
-- http://blog.himdd.com/?p=1496
+
+see -> http://blog.pfan.cn/cruxd/17413.html
+see -> http://blog.himdd.com/?p=1496
+  
 ** 不相邻重排列
+
 ** 其他题目
+
 + [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3907][UVA/12464 - Professor Lazy, Ph.D.]]
   - A: 《具体数学》第一章课后习题，循环节为5。
 + [[http://acm.hdu.edu.cn/showproblem.php?pid=4359][HDU/4359 - Easy Tree DP?]]
@@ -64,16 +70,22 @@ int main() {
   - Q: 从(0,0)点走到(N,0)点只能右上、右、右下走(不能走到x轴以下)，问有多少种不同走法？
   - A: 考虑到任意一个可行的路径中任意一个路径中的位置右上走的次数一定大于等于右下走的次数（不然会到x轴以下），
     则枚举N步中K对右上/右下，问题即转化为经典的Catalan数问题。
+    
 ** 上下不着边问题
+
 + [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3795][UVA/12373 - Pair of Touching Circles]]
   - Q:
 + [[http://acm.zju.edu.cn/onlinejudge/showProblem.do?problemCode=3647][ZOJ/3647 - Gao the Grid]]
   - A: 即是上下左右不相接的问题，转化为上下左右固定的问题，两次求和即可
+    
 ** 树
+
 + [[http://codeforces.com/problemset/problem/229/C][CF/229C - Triangles]]
   - Q: 一个完全图分成两个部分(A, B)，问两个部分一共有多少个三角环路
   - A: 容斥 C(n, 3) - C(m, 1)*C(n, 2) + sum(C(di, 2))  [m为B图边的个数，di为i点的度数B图中的度数]
+    
 * TODO Combination 组合数学2
+
 #+begin_src latex
 \subsection{Combination Identities 组合恒等式}
 ${n}\choose{r}$ is the number of r-element subsets of an n-element set\cite{comb1}, and
@@ -147,39 +159,37 @@ P_r(n) = \frac{n(n+1)(n+2)\ldots(n+r-1)}{r!} = {{n+r-1}\choose{r}}
 #+end_src
 
 * TODO 博弈
+
 # - [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3913][UVA/12469 - Stones]]
 #   - Q: 
 #   - A:
 http://www.chenyajun.com/2010/06/22/4360
 
 * 概率
+
 ** 全概率
+
 + [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3904][UVA/12461 - Airplane]]
   - Q: N人 *依次入座* ，第一个人随机坐1~N号座位，
     其他人(i号人)若i号座位没有被占则坐i号座位，否则剩下空的位置随机坐，
     问N号人不坐自己位置的概率。
   - A: 《编程之美》 - 金刚坐飞机问题。其中第i个人坐自己位置的概率 \(\large P(i)=\frac{N-i+1}{N-i+2}\)
 
-* Computational Geometry
+* [[file:computational_geometry.org][Computational Geometry]]
 
-[[file:computational_geometry.org][SEE MORE]]
+* [[file:string_algorithm.org][String Algorithm]]
 
-* String Algorithm
-
-[[file:string_algorithm.org][SEE MORE]]
-
-* Range Query Algorithm
-
-[[file:range_query_algorithm.org][SEE MORE]]
+* [[file:range_query_algorithm.org][Range Query Algorithm]]
 
 * Graph Theory
-* Hashing
-
-[[file:hashing.org][SEE MORE]]
+* [[file:hashing.org][Hashing]]
 
 * 优化
+
 ** 单调优化
+
 *** stack 栈
+
 + [[http://www.spoj.pl/problems/CITY2/][SPOJ/CITY2 - A Famous City]]
 + [[http://acm.hdu.edu.cn/showproblem.php?pid=4328][HDU/4328 - Cut the cake]]
 + [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3925][UVA/12481 - K-Neutral Rectangles]] ***TODO
@@ -187,6 +197,7 @@ http://www.chenyajun.com/2010/06/22/4360
 ** RMQ-ST 优化
 
 * DLX 跳舞链
+
 - [[http://poj.org/problem?id=3074][POJ/3074 - Sudoku]]，[[http://www.cnblogs.com/AndreMouche/archive/2011/02/24/1964136.html][学姐的博客]]
 #+begin_src cpp
 #include<stdio.h>

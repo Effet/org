@@ -1,0 +1,24 @@
+#+TITLE: GIT
+
+* 分治合并
+
+http://gitbook.liuhui998.com/5_3.html
+
+* change remote
+
+http://stackoverflow.com/questions/2432764/how-to-change-a-remote-repository-uri-using-git
+https://help.github.com/articles/changing-a-remote-s-url
+
+use this command
+#+BEGIN_SRC sh
+git remote set-url origin https://github.com/ironyKuU/org.git
+#+END_SRC
+
+this project's url:
+#+BEGIN_SRC sh
+git remote -v
+#+END_SRC
+#+BEGIN_EXAMPLE
+origin	https://github.com/ironyKuU/org.git (fetch)
+origin	https://github.com/ironyKuU/org.git (push)
+#+END_EXAMPLE

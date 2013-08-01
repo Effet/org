@@ -7,7 +7,11 @@
 This is my personal wiki & note & knowledges.
 
 * [[file:linux/linux.org][Linux]]: Daily workstation, useful tips.
-* [[file:icpc.org][ACM/ICPC:]] Skills for ACM/ICPC.
+
+* [[file:algorithm/algorithm.org][ACM/ICPC:]] Skills for ACM/ICPC.
+
 * [[file:latex.org][LaTeX]]: Note for LaTex.
-* [[file:web.org][Web]]: Web front-end developing, HTML5, CSS, js and so on.
+
+* [[file:web_developing_tips.org][Web Tips]]: Web front-end developing, HTML5, CSS, js and so on.
+
 * [[file:english/english.org][English]]: My english learning.

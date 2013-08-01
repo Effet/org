@@ -1,0 +1,6 @@
+#+TITLE: SSH
+
+* ~/.ssh/config
+
+http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/
+http://www.lainme.com/doku.php/blog/2011/01/%E4%BD%BF%E7%94%A8ssh_config

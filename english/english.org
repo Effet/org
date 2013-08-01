@@ -3,15 +3,17 @@
 * Dictionary
 
 ** GoldenDict
-   
-   - WordNet & JMDict (.dsl)
-       http://sourceforge.net/projects/goldendict/files/dictionaries/
-   - morphologies
-       http://sourceforge.net/projects/goldendict/files/better%20morphologies/1.0/
 
+   1. WordNet & JMDict (.dsl)
+      http://sourceforge.net/projects/goldendict/files/dictionaries/
+   2. morphologies
+      http://sourceforge.net/projects/goldendict/files/better%20morphologies/1.0/
+      
 * by which / in which
-  http://tw.knowledge.yahoo.com/question/question?qid=1012030601485
+
+http://tw.knowledge.yahoo.com/question/question?qid=1012030601485
 
 * that / which
-  http://oxforddictionaries.com/words/that-or-which
-  http://grammar.quickanddirtytips.com/which-versus-that.aspx
+
+http://oxforddictionaries.com/words/that-or-which
+http://grammar.quickanddirtytips.com/which-versus-that.aspx

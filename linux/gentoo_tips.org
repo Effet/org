@@ -1,0 +1,47 @@
+#+TITLE: Gentoo Tips
+
+some usefull -> http://gentoovps.net/gentoo-portage-tips/
+
+* ebuild
+
+http://devmanual.gentoo.org/function-reference/install-functions/index.html
+
+* kernel
+
+- 用 make localmodconfig 去掉一些沒用到的
+- 把 lspci -n (sys-apps/pciutils) 貼到 http://kmuto.jp/debian/hcl/，觀察需要的驅動名，然後在 make menuconfig 裏用 h 搜索
+
+* Printer
+
+** hplip
+
+see -> http://en.gentoo-wiki.com/wiki/CUPS#HP_Printers
+
+* Eix
+
+查看package 属于哪个 overlay
+#+begin_src sh
+eix -Jc
+#+end_src
+
+* Time
+
+** hwclock
+
+usage:
+#+begin_example
+hwclock -w :write current time to hardware time
+hwclock -s :set current time from hardware time
+#+end_example
+
+** ntpd
+
+#+begin_src sh
+emerge net-misc/openntpd
+#+end_src
+usage:
+#+begin_example
+ntpd -s :sync time
+/etc/init.d/ntpd (start|stop|restart)
+#+end_example
+

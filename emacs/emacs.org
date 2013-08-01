@@ -1,6 +1,6 @@
 #+TITLE: Emacs
 
-* Frequent command/keybinding
+* Frequently used command/keybinding
 
 ** Delete a whole line
 

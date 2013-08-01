@@ -1,0 +1,11 @@
+#+TITLE: Fedora tips
+
+* Fetch Package Only
+
+** [[http://www.cyberciti.biz/faq/yum-downloadonly-plugin/][How To Download a RPM Package Using yum Command Without Installing On Linux]]
+
+#+begin_src sh
+yum install yum-downloadonly
+yum install abc --downloadonly
+#+end_src
+Packages will in /var/cache/

@@ -1,0 +1,133 @@
+#+TITLE: install archlinux in eeepc x101
+
+This section details archlinux in my eeepc x101 notebook.
+<2013-03-03 Sun>
+
+* Disk Infomation
+
+#+begin_src sh
+parted /dev/sda u s p
+#+end_src
+#+begin_example
+Model: ATA JMicron (scsi)
+Disk /dev/sda: 15740928s
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start    End        Size       File system  Name       Flags
+ 1      2048s    4095s      2048s                   BIOS_GRUB  bios_grub
+ 2      4096s    208895s    204800s    ext2         ARCH_BOOT  boot
+ 3      208896s  15732735s  15523840s  ext4         ARCH_ROOT
+#+end_example
+#+begin_src sh
+sed -e '/^#.*$/d' -e '/^ *$/d' /etc/fstab
+#+end_src
+#+begin_example
+/dev/sda3               /               btrfs           rw,relatime,ssd,space_cache     0 1
+/dev/sda2               /boot           ext2            rw,relatime     0 2
+#+end_example
+
+* System Time
+
+Time zone setting.
+#+begin_src sh
+ln -s /usr/share/zoneinfo/Europe/Athens /etc/localtime
+#+end_src
+Use UTC in hardware clock.
+#+begin_src sh
+hwclock --systohc --utc
+#+end_src
+
+* Locale
+
+#+begin_src sh
+sed '/^#.*$/d' /etc/locale.gen
+#+end_src
+#+begin_example
+en_US.UTF-8 UTF-8
+en_US ISO-8859-1
+zh_CN.GB18030 GB18030
+zh_CN.GBK GBK
+zh_CN.UTF-8 UTF-8
+zh_CN GB2312
+#+end_example
+#+begin_src sh
+cat /etc/locale.conf
+#+end_src
+#+begin_example
+LANG="en_US.UTF-8"
+LC_CTYPE="zh_CN.UTF-8"
+#+end_example
+
+* Install a New System
+
+netcfg has been installed default.
+#+begin_src sh
+pacstrap /mnt base base-devel \
+              # net-tools wireless_tools \
+              # dialog elinks \
+              w3m wpa_supplicant \
+              htop git zsh grml-zsh-config
+#+end_src
+
+Add this to {{{/etc/pacman.conf}}}, then
+#+begin_example
+[archlinuxfr]
+Server = http://repo.archlinux.fr/$arch
+#+end_example
+install yaourt, and delete upon text.
+#+begin_src sh
+pacman -Syy yaourt
+#+end_src
+
+* Users
+
+Rule to create a new user.
+#+begin_src sh
+useradd -m -g users -G wheel,storage,power -s /bin/zsh <username>
+#+end_src
+
+* Graphic (base system)
+
+#+begin_src sh
+pacman -S alsa-utils \
+          xorg-server{,-utils} xorg-{xinit,utils} \
+          xf86-video-{vesa,intel} xf86-input-synaptics \
+          xorg-twm xterm #for test
+#+end_src
+
+Fonts I use.
+#+begin_src sh
+pacman -S ttf-{dejavu,droid,inconsolata} \ #,envy-code-r} \
+          wqy-microhei
+          terminus-font
+#+end_src
+
+** enlightenment17
+
+#+begin_src sh
+pacman -S enlightenment17
+yaourt -S e-modules-extra-svn terminology econnman-svn
+#+end_src
+
+#+begin_src sh
+pacman -S lxdm
+systemctl enable lxdm.service
+#+end_src
+
+** monsterwm
+
+pacman -S dmenu
+
+* Daily Software
+
+#+begin_src sh
+pacman -S vim emacs \
+          #opera chromium \
+          luakit flashplugin \
+          fcitx fcitx-{configtool,gtk2,gtk3,qt} \
+          mplayer feh
+          rxvt-unicode zathura
+#+end_src
+
