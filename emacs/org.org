@@ -1,4 +1,5 @@
 #+TITLE: Org-mode
+#+DATE: <2013-08-02 Fri>
 
 * Usage of Org-mode
 

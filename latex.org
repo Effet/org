@@ -2,6 +2,7 @@
 #+OPTIONS: num:t toc:t \n:nil
 #+OPTIONS: LaTex:t
 #+MATHJAX: align:"left"
+#+DATE: <2013-08-02 Fri>
 
 * Symbols
 

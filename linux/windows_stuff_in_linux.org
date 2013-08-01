@@ -1,4 +1,5 @@
 #+TITLE: Some MS-Windows things in the Linux
+#+DATE: <2013-08-02 Fri>
 
 * dosfsck
 

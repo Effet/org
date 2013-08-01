@@ -1,4 +1,5 @@
 #+TITLE: Gentoo Tips
+#+DATE: <2013-08-02 Fri>
 
 some usefull -> http://gentoovps.net/gentoo-portage-tips/
 

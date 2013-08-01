@@ -1,4 +1,5 @@
 #+TITLE: Range Query Algorithm
+#+DATE: <2013-08-02 Fri>
 
 * Segment Tree
 * Fenwick Tree (Binary Indexed Tree)

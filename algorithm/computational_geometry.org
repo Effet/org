@@ -1,4 +1,5 @@
 #+TITLE: Computational Geometry
+#+DATE: <2013-08-02 Fri>
 
 * Circles
 

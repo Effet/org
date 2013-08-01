@@ -1,4 +1,5 @@
 #+TITLE: String Algorithm
+#+DATE: <2013-08-02 Fri>
 
 * KMP
 

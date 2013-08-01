@@ -1,7 +1,7 @@
 #+TITLE: install archlinux in eeepc x101
+#+DATE: <2013-03-03 Sun>
 
 This section details archlinux in my eeepc x101 notebook.
-<2013-03-03 Sun>
 
 * Disk Infomation
 

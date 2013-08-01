@@ -1,4 +1,5 @@
 #+TITLE: Linux Tips
+#+DATE: <2013-08-02 Fri>
 
 * Simple Http Server
 

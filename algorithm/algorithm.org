@@ -1,6 +1,7 @@
 #+TITLE: Algorithm & Formulas For ACM/ICPC
 #+OPTIONS: num:t toc:t \n:nil LaTeX:t
 #+MATHJAX: align:"left"
+#+DATE: <2013-08-02 Fri>
 
 * [[file:divide_and_conquer.org][Divide & Conquer]]
 

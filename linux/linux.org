@@ -1,4 +1,5 @@
 #+TITLE: My Linux Journey
+#+DATE: <2013-08-02 Fri>
 
 *The World's Best OS.*
 

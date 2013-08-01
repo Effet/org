@@ -1,4 +1,5 @@
 #+TITLE: Divide & Conquer
+#+DATE: <2013-08-02 Fri>
 
 * Binary Search
 

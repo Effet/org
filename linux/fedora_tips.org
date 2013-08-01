@@ -1,4 +1,5 @@
 #+TITLE: Fedora tips
+#+DATE: <2013-08-02 Fri>
 
 * Fetch Package Only
 
