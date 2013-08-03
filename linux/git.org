@@ -23,3 +23,13 @@ git remote -v
 origin	https://github.com/ironyKuU/org.git (fetch)
 origin	https://github.com/ironyKuU/org.git (push)
 #+END_EXAMPLE
+
+* ignore changes in git submodules
+
+http://stackoverflow.com/a/5542452
+
+also can use
+
+#+BEGIN_SRC sh
+git status --ignore-submodules[=<when>]
+#+END_SRC
