@@ -1,5 +1,7 @@
-#+TITLE: My Personal Wiki & Note & Knowledges
-#+DATE: <2013-08-02 Fri>
+#+TITLE:  My Personal Wiki & Note & Knowledges
+#+AUTHOR: ironyKuU
+#+EMAIL:  nesuadark@gmail.com
+#+DATE:   <2013-08-02 Fri>
 #+OPTIONS: H:3 num:nil toc:nil
 #+TEXT: This is my personal wiki & note & knowledges.
 
