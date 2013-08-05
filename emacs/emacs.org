@@ -17,12 +17,12 @@ C-u 0 C-k
 
 * Windows Installation
 
-see -> https://github.com/salborini/emacs-installer
-, and I forked here https://github.com/ironyKuU/emacs-installer
+https://github.com/salborini/emacs-installer
+my fork: https://github.com/ironyKuU/emacs-installer
 
 * Key-analysing (keyfreq)
 
-see -> http://ergoemacs.org/emacs/command-frequency.html
+http://ergoemacs.org/emacs/command-frequency.html
 
 * Org-mode
 

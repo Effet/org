@@ -1,7 +1,10 @@
 #+title: Network Sharing
 #+DATE: <2013-08-06 Tue>
+
 * Linux
+
 ** the archlinux way
+
 https://wiki.archlinux.org/index.php/Internet_Share
 https://wiki.archlinux.org/index.php/Sharing_PPP_Connection
 
