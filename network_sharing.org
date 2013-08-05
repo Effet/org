@@ -1,0 +1,9 @@
+#+title: Network Sharing
+#+DATE: <2013-08-06 Tue>
+* Linux
+** the archlinux way
+https://wiki.archlinux.org/index.php/Internet_Share
+https://wiki.archlinux.org/index.php/Sharing_PPP_Connection
+
+and, see here [[https://wiki.archlinux.org/index.php/Software_Access_Point#NAT_Setup][Software_Access_Point#NAT_Setup]], there is a simple script to share
+network through wlan [[https://bbs.archlinux.org/viewtopic.php?pid%3D1269258][create_ap]].

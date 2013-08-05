@@ -1,5 +1,5 @@
 #+TITLE: My Linux Journey
-#+DATE: <2013-08-02 Fri>
+#+DATE: <2013-08-05 Mon>
 
 *The World's Best OS.*
 
@@ -18,6 +18,10 @@
 ** Fedora
 
 *** [[file:fedora_tips.org][some tips]]
+
+* Network Sharing
+
+[[file:~/proj/org/network_sharing.org::*Linux][MORE DETAIL]]
 
 * [[file:windows_stuff_in_linux.org][Some Windows Program/Commands in Linux]]
 
