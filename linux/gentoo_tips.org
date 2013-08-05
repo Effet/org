@@ -1,7 +1,9 @@
 #+TITLE: Gentoo Tips
 #+DATE: <2013-08-02 Fri>
 
-some usefull -> http://gentoovps.net/gentoo-portage-tips/
+* some usefull
+
+http://gentoovps.net/gentoo-portage-tips/
 
 * ebuild
 
@@ -11,12 +13,12 @@ http://devmanual.gentoo.org/function-reference/install-functions/index.html
 
 - 用 make localmodconfig 去掉一些沒用到的
 - 把 lspci -n (sys-apps/pciutils) 貼到 http://kmuto.jp/debian/hcl/，觀察需要的驅動名，然後在 make menuconfig 裏用 h 搜索
-
+  
 * Printer
 
 ** hplip
 
-see -> http://en.gentoo-wiki.com/wiki/CUPS#HP_Printers
+http://en.gentoo-wiki.com/wiki/CUPS#HP_Printers
 
 * Eix
 
@@ -45,4 +47,3 @@ usage:
 ntpd -s :sync time
 /etc/init.d/ntpd (start|stop|restart)
 #+end_example
-

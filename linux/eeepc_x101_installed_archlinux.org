@@ -1,7 +1,6 @@
 #+TITLE: install archlinux in eeepc x101
 #+DATE: <2013-03-03 Sun>
-
-This section details archlinux in my eeepc x101 notebook.
+#+TEXT: This section details archlinux in my eeepc x101 notebook.
 
 * Disk Infomation
 
@@ -70,7 +69,6 @@ pacstrap /mnt base base-devel \
               w3m wpa_supplicant \
               htop git zsh grml-zsh-config
 #+end_src
-
 Add this to {{{/etc/pacman.conf}}}, then
 #+begin_example
 [archlinuxfr]
@@ -96,7 +94,6 @@ pacman -S alsa-utils \
           xf86-video-{vesa,intel} xf86-input-synaptics \
           xorg-twm xterm #for test
 #+end_src
-
 Fonts I use.
 #+begin_src sh
 pacman -S ttf-{dejavu,droid,inconsolata} \ #,envy-code-r} \
@@ -110,7 +107,6 @@ pacman -S ttf-{dejavu,droid,inconsolata} \ #,envy-code-r} \
 pacman -S enlightenment17
 yaourt -S e-modules-extra-svn terminology econnman-svn
 #+end_src
-
 #+begin_src sh
 pacman -S lxdm
 systemctl enable lxdm.service
@@ -130,4 +126,3 @@ pacman -S vim emacs \
           mplayer feh
           rxvt-unicode zathura
 #+end_src
-

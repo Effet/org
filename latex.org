@@ -1,8 +1,7 @@
 #+TITLE: LaTeX note
-#+OPTIONS: num:t toc:t \n:nil
+#+DATE: <2013-08-02 Fri>
 #+OPTIONS: LaTex:t
 #+MATHJAX: align:"left"
-#+DATE: <2013-08-02 Fri>
 
 * Symbols
 

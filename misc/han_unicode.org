@@ -4,7 +4,6 @@
 * CJK_Unified_Ideographs
 
 0x4E00 - 0x9FFF
-
 http://en.wikipedia.org/wiki/CJK_Unified_Ideographs
 http://en.wikipedia.org/wiki/CJK_Unified_Ideographs_%28Unicode_block%29
 http://www.khngai.com/chinese/charmap/tbluni.php

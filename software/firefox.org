@@ -3,8 +3,7 @@
 
 * Tabs on top
 
-see -> https://support.mozilla.org/en-US/kb/put-tabs-back-on-bottom
-
+https://support.mozilla.org/en-US/kb/put-tabs-back-on-bottom
 #+BEGIN_EXAMPLE
 about:config
 `browser.tabs.onTop' set false

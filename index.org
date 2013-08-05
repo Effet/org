@@ -1,18 +1,10 @@
-#+TITLE:     My Personal Wiki & Note & Knowledges
-#+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:tl creator:nil
-#+OPTIONS: TeX:t LaTeX:nil skip:nil d:nil tags:not-in-toc author:nil timestamp:nil
-#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
-#+STYLE: <link rel="stylesheet" type="text/css" href="css/stylesheet.css" />
+#+TITLE: My Personal Wiki & Note & Knowledges
 #+DATE: <2013-08-02 Fri>
-
-This is my personal wiki & note & knowledges.
+#+OPTIONS: H:3 num:nil toc:nil
+#+TEXT: This is my personal wiki & note & knowledges.
 
 * [[file:linux/linux.org][Linux]]: Daily workstation, useful tips.
-
 * [[file:algorithm/algorithm.org][ACM/ICPC:]] Skills for ACM/ICPC.
-
 * [[file:latex.org][LaTeX]]: Note for LaTex.
-
 * [[file:web_developing_tips.org][Web Tips]]: Web front-end developing, HTML5, CSS, js and so on.
-
 * [[file:english/english.org][English]]: My english learning.

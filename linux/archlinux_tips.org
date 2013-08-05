@@ -3,4 +3,4 @@
 
 * pacnew
 
--> https://wiki.archlinux.org/index.php/Pacnew_and_Pacsave_Files
+https://wiki.archlinux.org/index.php/Pacnew_and_Pacsave_Files
