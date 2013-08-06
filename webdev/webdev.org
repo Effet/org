@@ -1,0 +1,5 @@
+#+TITLE: Web Developing
+#+DATE: <2013-08-06 Tue>
+
+* [[file:web_developing_tips.org][some tips]]
+* [[file:wsgi.org][WSGI]]

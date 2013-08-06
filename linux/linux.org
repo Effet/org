@@ -1,7 +1,6 @@
 #+TITLE: My Linux Journey
 #+DATE: <2013-08-05 Mon>
-
-*The World's Best OS.*
+#+TEXT: *The World's Best OS.*
 
 * Distros
 
@@ -21,7 +20,7 @@
 
 * Network Sharing
 
-[[file:~/proj/org/network_sharing.org::*Linux][MORE DETAIL]]
+[[file:../misc/network_sharing.org::*Linux][MORE DETAIL]]
 
 * [[file:windows_stuff_in_linux.org][Some Windows Program/Commands in Linux]]
 

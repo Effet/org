@@ -1,0 +1,7 @@
+#+TITLE: WSGI
+#+DATE: <2013-08-06 Tue>
+
+* WSGI is dead?
+
+http://dirtsimple.org/2011/07/wsgi-is-dead-long-live-wsgi-lite.html
+http://lucumr.pocoo.org/2011/7/27/the-pluggable-pipedream/

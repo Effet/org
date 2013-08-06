@@ -1,12 +1,12 @@
 #+TITLE:  My Personal Wiki & Note & Knowledges
 #+AUTHOR: ironyKuU
 #+EMAIL:  nesuadark@gmail.com
-#+DATE:   <2013-08-02 Fri>
+#+DATE:   <2013-08-06 Tue>
 #+OPTIONS: H:3 num:nil toc:nil
 #+TEXT: This is my personal wiki & note & knowledges.
 
 * [[file:linux/linux.org][Linux]]: Daily workstation, useful tips.
 * [[file:algorithm/algorithm.org][ACM/ICPC:]] Skills for ACM/ICPC.
-* [[file:latex.org][LaTeX]]: Note for LaTex.
-* [[file:web_developing_tips.org][Web Tips]]: Web front-end developing, HTML5, CSS, js and so on.
+* [[file:misc/latex.org][LaTeX]]: Note for LaTex.
+* [[file:webdev/webdev.org][Web Developing]]: Web front-end developing, HTML5, CSS, js and so on.
 * [[file:english/english.org][English]]: My english learning.
