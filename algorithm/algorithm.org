@@ -1,5 +1,5 @@
 #+TITLE: Algorithm & Formulas For ACM/ICPC
-#+DATE: <2013-08-02 Fri>
+#+DATE: <2013-08-06 Tue>
 #+OPTIONS: num:t toc:t \n:nil LaTeX:t
 #+MATHJAX: align:"left"
 
@@ -166,7 +166,27 @@ P_r(n) = \frac{n(n+1)(n+2)\ldots(n+r-1)}{r!} = {{n+r-1}\choose{r}}
 #   - A:
 http://www.chenyajun.com/2010/06/22/4360
 
+** Sprague-Grundy theorem
+
+** 博弈证明
+
+- 必败态和胜态有着如下性质
+  1) 若面临末状态者为获胜则末状态为胜态否则末状态为必败态。
+  2) 一个局面是胜态的充要条件是该局面进行某种决策后会成为必败态。
+  3) 一个局面是必败态的充要条件是该局面无论进行何种决策均会成为胜态
+
+** 奇异局
+
+#+BEGIN_EXAMPLE
+ak =[k（1+√5）/2]，bk= ak + k （k=0，1，2，...,n 方括号表示取整函数)
+#+END_EXAMPLE
+
 * 概率
+
+** 期望
+
+期望可以分解成多个子期望的加权和，权为子期望发生的概率，
+即 E(aA+bB+...) = aE(A) + bE(B) +... 
 
 ** 全概率
 
@@ -177,12 +197,9 @@ http://www.chenyajun.com/2010/06/22/4360
   - A: 《编程之美》 - 金刚坐飞机问题。其中第i个人坐自己位置的概率 \(\large P(i)=\frac{N-i+1}{N-i+2}\)
 
 * [[file:computational_geometry.org][Computational Geometry]]
-
 * [[file:string_algorithm.org][String Algorithm]]
-
 * [[file:range_query_algorithm.org][Range Query Algorithm]]
-
-* Graph Theory
+* [[file:graph_theory.org][Graph Theory]]
 * [[file:hashing.org][Hashing]]
 
 * 优化
@@ -411,3 +428,31 @@ int main()
     return 0;
 }
 #+end_src
+
+* Unconcerned
+
+** 并查集
+
+*** Think
+
+#+BEGIN_EXAMPLE
+并查集的一般用途就是用来维护某种具有自反、对称、传递性质的关系的等价类。并查集一
+般以树形结构存储，多棵树构成一个森林，每棵树构成一个集合，树中的每个节点就是该集
+合的元素，找一个代表元素作为该树(集合)的祖先。
+#+END_EXAMPLE
+
+** STL
+
+*** c++保留小数
+
+#+BEGIN_SRC cpp
+#include <iomanip>
+#include <iostream>
+using namespace std;
+
+int main (){
+   double n = 12.350922222222222222222;
+   cout<<setiosflags(ios::fixed)<<setprecision(2)<<n<<endl;
+   return 0;
+}
+#+END_SRC

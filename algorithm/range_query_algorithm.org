@@ -2,6 +2,529 @@
 #+DATE: <2013-08-02 Fri>
 
 * Segment Tree
+
+#+BEGIN_SRC cpp
+/*
+ ID:qcx97811
+ LANG:C
+ TASK:H
+ */
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+/*还有一个修改没加*/
+typedef struct //线段树的结构体 
+{//l表示左端点 r右端点 max表示这一段的最大值 min表示这一段的最小值
+	int l, r;
+	int max, min;
+} Tree;
+Tree node[500006*4];//4倍
+void init_node(int idx, int _l, int _r){//初始化线段树
+	int mid;
+	node[idx].l = _l;//这里不管怎样都要赋值,确定边界
+	node[idx].r = _r;
+	if(_l==_r){//如果到了底层了直接返回
+		return;
+	}
+	mid = (_l+_r)>>1;
+	init_node(2*idx, _l, mid);//初始化左子树
+	init_node(2*idx+1, mid+1, _r);//初始化右子树
+}
+void insert(int idx, int _l, int _r, int val){//插入一个值
+	int mid;
+	if(_l<=node[idx].l&&_r>=node[idx].r){//如果区域覆盖这棵树就直接改变这棵树就行了 不改变子树的信息
+		node[idx].min = node[idx].max = val;
+		return;
+	}
+	if(_r<=node[2*idx].r){//插入左子树 
+		insert(2*idx, _l, _r, val);
+		//更新该区域的最大最小值
+		if(node[2*idx].max>node[idx].max)
+			node[idx].max = node[2*idx].max;
+		if(node[2*idx].min<node[idx].min)
+			node[idx].min = node[2*idx].min;
+	}else{
+		if(_l>=node[2*idx+1].l){//插入右子树
+			insert(2*idx+1, _l, _r, val);
+			//更新该区域的最大最小值
+			if(node[2*idx+1].max>node[idx].max)
+				node[idx].max = node[2*idx+1].max;
+			if(node[2*idx+1].min<node[idx].min)
+				node[idx].min = node[2*idx+1].min;
+		}else{
+			//插入左子树和右子树
+			insert(2*idx, _l, node[2*idx].r, val);
+			insert(2*idx+1, node[2*idx+1].l, _r, val);
+			//更新该区域的最大最小值
+			if(node[2*idx].max>node[idx].max)
+				node[idx].max = node[2*idx].max;
+			if(node[2*idx].min<node[idx].min)
+				node[idx].min = node[2*idx].min;
+			if(node[2*idx+1].max>node[idx].max)
+				node[idx].max = node[2*idx+1].max;
+			if(node[2*idx+1].min<node[idx].min)
+				node[idx].min = node[2*idx+1].min;
+		}
+	}
+}
+int query_max(int idx, int _l, int _r){//求_l到_r区间的最大值
+	int max, max1;
+	if(_l<=node[idx].l&&_r>=node[idx].r)//如果覆盖这个区域 直接返回
+		return node[idx].max;
+	if(_r<=node[2*idx].r){//返回左子树的最大值
+		return query_max(2*idx, _l, _r);
+	}else{
+		if(_l>=node[2*idx+1].l)//返回右子树的最大值
+			return query_max(2*idx+1, _l, _r);
+		//返回左子树和右子树中最大值的最大值
+		max = query_max(2*idx, _l, node[2*idx].r);
+		max1 = query_max(2*idx+1, node[2*idx+1].l, _r);
+		if(max>max1)
+			return max;
+		else
+			return max1;
+	}
+}
+int query_min(int idx, int _l, int _r){//类似上面的query_max
+	int min, min1;
+	if(_l<=node[idx].l&&_r>=node[idx].r)
+		return node[idx].min;
+	if(_r<=node[2*idx].r)
+		return query_min(2*idx, _l, _r);
+	else{
+		if(_l>=node[2*idx+1].l){
+			return query_min(2*idx+1, _l, _r);
+		}else{
+			min = query_min(2*idx, _l, node[2*idx].r);
+			min1 = query_min(2*idx+1, node[2*idx+1].l, _r);
+			if(min<min1)
+				return min;
+			else
+				return min1;
+		}
+	}
+}
+#+END_SRC
+
+** 用于着色的线段树
+
+- 用于着色的线段树，颜色可以重复着，后着的颜色覆盖之前的。
+- 颜色编号从1开始，特别地，color[i]=0表示未着色，color[i]=-1表示该线段上颜色不一致
+
+#+BEGIN_SRC cpp
+class SegTree{
+	static const int UPBOUND = (110);UPBOUND需为2的幂，所有线段应在[0,UPBOUND)上
+	int segbg[(UPBOUND1)];
+	int segen[(UPBOUND1)];
+	int color[(UPBOUND1)];
+	int bj[(UPBOUND1)];
+	int a, b, x;
+
+	void mainTain(int i){
+		if(bj[i]){
+			color[i] = bj[i];
+			if(segen[i]-segbg[i]1){
+				bj[i2+1] = bj[i];
+				bj[i2+2] = bj[i];
+			}
+			bj[i] = 0;
+		}
+	}
+
+	void _makeSegTree(int i, int a, int b){
+		segbg[i] = a;
+		segen[i] = b;
+		if(a+1b){如果线段长度大于1
+			_makeSegTree(i2+1, a, a+(b-a)2);
+			_makeSegTree(i2+2, a+(b-a)2, b);
+		}
+	}
+
+	void _colorSeg(int i){
+		mainTain(i);
+		if(a=segbg[i]&&segen[i]=b){
+			bj[i] = x;
+		}else if(segen[i]-segbg[i]1){
+			color[i] = -1;-1表示这段的颜色不一致
+			if(asegbg[i]+(segen[i]-segbg[i])2){
+				_colorSeg(i2+1);
+			}
+			if(segbg[i]+(segen[i]-segbg[i])2=b){
+				_colorSeg(i2+2);
+			}
+		}
+	}
+
+	int _queryColor(int i, int n){
+		mainTain(i);
+		if(color[i]!=-1)
+			return color[i];
+		if(nsegbg[i]+(segen[i]-segbg[i])2){
+			return _queryColor(i2+1, n);
+		}else{
+			return _queryColor(i2+2, n);
+		}
+	}
+
+public
+	SegTree(){
+		clearColor();
+		makeSegTree(0, UPBOUND);
+	}
+	void makeSegTree(int a, int b){
+		_makeSegTree(0, a, b);
+	}
+	void clearColor(){
+		mset(color, 0);
+		mset(bj, 0);
+	}
+	为线段[a,b)着颜色x
+	void colorSeg(int a, int b, int x){
+		SegTreea = a;
+		SegTreeb = b;
+		SegTreex = x;
+		_colorSeg(0);
+	}
+	询问点n的颜色(即线段[n,n+1)上的颜色)
+	int queryColor(int n){
+		return _queryColor(0, n);
+	}
+} segTree;
+#+END_SRC
+
+** 用于计数的线段树
+
+#+BEGIN_SRC cpp
+//用于计数的线段树
+class SegTree{
+	static const int UPBOUND = (1<<17);//UPBOUND需为2的幂，所有线段应在[0,UPBOUND)上
+	int segbg[(UPBOUND<<1)];
+	int segen[(UPBOUND<<1)];
+	int cover[(UPBOUND<<1)];//覆盖次数
+	int a, b, x;
+
+	void _makeSegTree(int i, int a, int b){
+		segbg[i] = a;
+		segen[i] = b;
+		if(a+1<b){//如果线段长度大于1
+			_makeSegTree(i*2+1, a, a+(b-a)/2);
+			_makeSegTree(i*2+2, a+(b-a)/2, b);
+		}
+	}
+
+	void _insertSeg(int i){
+		if(a<=segbg[i]&&segen[i]<=b){
+			cover[i] += x;
+		}else if(segen[i]-segbg[i]>1){
+			if(a<segbg[i]+(segen[i]-segbg[i])/2){
+				_insertSeg(i*2+1);
+			}
+			if(segbg[i]+(segen[i]-segbg[i])/2<=b){
+				_insertSeg(i*2+2);
+			}
+		}
+	}
+
+	void _deleteSeg(int i){
+		if(a<=segbg[i]&&segen[i]<=b){
+			cover[i] -= x;
+		}else if(segen[i]-segbg[i]>1){
+			if(a<segbg[i]+(segen[i]-segbg[i])/2){
+				_deleteSeg(i*2+1);
+			}
+			if(segbg[i]+(segen[i]-segbg[i])/2<=b){
+				_deleteSeg(i*2+2);
+			}
+		}
+	}
+
+	int _queryCover(int i, int n){
+		if(n<segbg[i]+(segen[i]-segbg[i])/2){
+			return cover[i]+((segen[i]-segbg[i]>1) ? _queryCover(i*2+1, n) : 0);
+		}else{
+			return cover[i]+((segen[i]-segbg[i]>1) ? _queryCover(i*2+2, n) : 0);
+		}
+	}
+
+public:
+	SegTree(){
+		clearCover();
+		makeSegTree(0, UPBOUND);
+	}
+	void makeSegTree(int a, int b){
+		_makeSegTree(0, a, b);
+	}
+	void clearCover(){
+		mset(cover, 0);
+	}
+	//默认区间为[a,b)
+	void insertSeg(int a, int b, int x = 1){
+		SegTree::a = a;
+		SegTree::b = b;
+		SegTree::x = x;
+		_insertSeg(0);
+	}
+	void deleteSeg(int a, int b, int x = 1){
+		SegTree::a = a+1;
+		SegTree::b = b+1;
+		SegTree::x = x;
+		_deleteSeg(0);
+	}
+	int queryCover(int n){
+		return _queryCover(0, n);
+	}
+} segTree;
+#+END_SRC
+
+** 浙大线段树模板（注释）
+
+#+BEGIN_SRC cpp
+//线段树的应用：
+//1）求面积：
+//一.坐标离散化；
+//二.垂直边按x坐标排序；
+//三.从左往右用线段树处理垂直边，累计每个离散x区间长度和线段树长度的乘积。
+//2）求周长：
+//一.坐标离散化；
+//二.垂直边按x坐标排序，第二关键字为入边优于出边；
+//三.从左往右用线段树处理垂直边，在每个离散点上先加入所有入边，累计线段树长度变化值，再删除所有出边，累计线段树长度变化值；
+//四.水平边按y坐标排序，第二关键字为入边优于出边；
+//五.从上往下用线段树处理水平边，在每个离散点上先加入所有入边，累计线段树长度变化值，再删除所有出边，累计线段树长度变化值。
+//
+//基本线段树代码：
+//基本线段树，可以处理加入边和删除边不同的情况
+//t是传入的线段树的根节点
+//l0, r0是传入的线段树的节点范围
+//l，r是线段树中的一个区间的两个端点
+#define MAXN 10000
+
+struct segtree{
+	int n;
+	int cnt[MAXN]; //覆盖这一节点区间的线段的个数
+	int len[MAXN]; //区间的长度
+	segtree(int t) :n(t){
+		for(int i = 1; i<=t; i++) //初始化数组
+			cnt[i] = len[i] = 0;
+	};
+
+	//成员函数啦
+	void update(int t, int l, int r); //更新以t为根节点的线段树的区间长度len[t]
+	void inc_seg(int t, int l0, int r0, int l, int r); //加入边
+	void dec_seg(int t, int l0, int r0, int l, int r); //删除边
+	int seg_len(int t, int l0, int r0, int l, int r); //求线段树的长度
+};
+
+//区间(l, r)的长度
+int length(int l, int r){
+	return (r-l);
+}
+
+//更新以t为根节点的线段树的区间长度len[t]
+void segtree::update(int t, int l, int r){
+	if(cnt[t]||(r-l)==1)
+		len[t] = length(l, r);
+	else
+		len[t] = len[t+t]+len[t+t+1]; //左右子树区间长度之和
+}
+
+//向以t为根节点、区间为(l0, r0)的线段树中加入区间(l, r)
+void segtree::inc_seg(int t, int l0, int r0, int l, int r){
+	if(l0==l&&r0==r){
+		cnt[t]++;
+	}else{
+		int m0 = (l0+r0)>>1; //即(l0+r0)/2
+		if(l<m0) //覆盖到左孩子区间
+		{
+			//向左孩子区间插入(l, r)
+			inc_seg(t+t, l0, m0, l, m0<r ? m0 : r);
+		}
+		if(r>m0) //覆盖到右孩子区间
+		{
+			//向右孩子区间插入(l, r)
+			inc_seg(t+t+1, m0, r0, m0>l ? m0 : l, r);
+		}
+		if(cnt[t+t]&&cnt[t+t+1]){
+			cnt[t+t]--;
+			update(t+t, l0, m0);
+			cnt[t+t+1]--;
+			update(t+t+1, m0, r0);
+			cnt[t]++;
+		}
+	}
+	update(t, l0, r0);
+}
+
+//向以t为根节点、区间为(l0, r0)的线段树中删除区间(l, r)
+void segtree::dec_seg(int t, int l0, int r0, int l, int r){
+	if(l0==l&&r0==r)
+		cnt[t]--;
+	else if(cnt[t]){
+		cnt[t]--;
+		if(l>l0)
+			inc_seg(t, l0, r0, l0, l); //抵消上面的cnt[t]--
+		if(r<r0)
+			inc_seg(t, l0, r0, r, r0); //同上
+	}else{
+		int m0 = (l0+r0)>>1;
+		if(l<m0)
+			dec_seg(t+t, l0, m0, l, m0<r ? m0 : r);
+		if(r>m0)
+			dec_seg(t+t+1, m0, r0, m0>l ? m0 : l, r);
+	}
+	update(t, l0, r0);
+}
+
+//求线段树中区间(l, r)的区间长度，(l0, r0)是线段树的初始节点区间
+int segtree::seg_len(int t, int l0, int r0, int l, int r){
+	if(cnt[t]||(l0==l&&r0==r))
+		return len[t];
+	else{
+		int m0 = (l0+r0)>>1;
+		int ret = 0;
+		if(l<m0)
+			ret += seg_len(t+t, l0, m0, l, m0<r ? m0 : r);
+		if(r>m0)
+			ret += seg_len(t+t+1, m0, r0, l, m0>l ? m0 : l, r);
+
+		return ret;
+	}
+}
+
+//线段树的扩展代码如下：
+//线段树扩展，可以计算长度和线段树
+//可以处理加入边和删除边不同的情况
+//t是传入的线段树的根节点
+//l0, r0是传入的线段树的节点范围
+//l，r是线段树中的一个区间的两个端点
+#define MAXN 10000
+
+struct segtree{
+	int n;
+	int cnt[MAXN]; //覆盖这一节点区间的线段的个数
+	int len[MAXN]; //区间的长度
+	int cut[MAXN]; //存放线段数
+	int bl[MAXN]; //标识左端点是否被区间覆盖到
+	int br[MAXN]; //标识右端点是否被区间覆盖到
+	segtree(int t) :
+		n(t){
+		for(int i = 1; i<=t; i++) //初始化数组
+			cnt[i] = len[i] = cut[i] = bl[i] = br[i] = 0;
+	}
+	;
+
+	//函数啦
+	void update(int t, int l, int r); //更新以t为根节点的线段树的区间长度len[t]
+	void inc_seg(int t, int l0, int r0, int l, int r); //加入边
+	void dec_seg(int t, int l0, int r0, int l, int r); //删除边
+	int seg_len(int t, int l0, int r0, int l, int r); //求区间的长度
+	int seg_cut(int t, int l0, int r0, int l, int r); //求线段数
+};
+
+int length(int l, int r){
+	return (r-l);
+}
+//更新以t为根节点、区间为[l, r]的线段树的区间长度len[t]
+//和线段数cut[t]及其左右端点标识bl[t]和br[t]
+void segtree::update(int t, int l, int r){
+	if(cnt[t]||(r-l)==1){
+		len[t] = length(l, r);
+		cut[t] = bl[t] = br[t] = 1;
+	}else{
+		len[t] = len[t+t]+len[t+t+1]; //左右子树长度之和
+		cut[t] = cut[t+t]+cut[t+t+1];
+		if(br[t+t]&&bl[t+t+1])
+			cut[t]--;
+		bl[t] = bl[t+t];
+		br[t] = br[t+t+1];
+	}
+}
+//向以t为根节点、区间为(l0, r0)的线段树中加入区间(l, r)
+void segtree::inc_seg(int t, int l0, int r0, int l, int r){
+	if(l0==l&&r0==r){
+		cnt[t]++;
+	}else{
+		int m0 = (l0+r0)>>1; //即(l0+r0)/2
+
+		if(l<m0) //覆盖到左孩子区间
+		{
+			//向左孩子区间插入(l, r)
+			inc_seg(t+t, l0, m0, l, m0<r ? m0 : r);
+		}
+
+		if(r>m0) //覆盖到右孩子区间
+		{
+			//向右孩子区间插入(l, r)
+			inc_seg(t+t+1, m0, r0, m0>l ? m0 : l, r);
+		}
+
+		if(cnt[t+t]&&cnt[t+t+1]){
+			cnt[t+t]--;
+			update(t+t, l0, m0);
+			cnt[t+t+1]--;
+			update(t+t+1, m0, r0);
+			cnt[t]++;
+		}
+	}
+	update(t, l0, r0);
+}
+//向以t为根节点、区间为(l0, r0)的线段树中删除区间(l, r)
+void segtree::dec_seg(int t, int l0, int r0, int l, int r){
+	if(l0==l&&r0==r)
+		cnt[t]--;
+	else if(cnt[t]){
+		cnt[t]--;
+		if(l>l0)
+			inc_seg(t, l0, r0, l0, l); //抵消上面的cnt[t]--
+		if(r<r0)
+			inc_seg(t, l0, r0, r, r0); //同上
+	}else{
+		int m0 = (l0+r0)>>1;
+		if(l<m0)
+			dec_seg(t+t, l0, m0, l, m0<r ? m0 : r);
+		if(r>m0)
+			dec_seg(t+t+1, m0, r0, m0>l ? m0 : l, r);
+	}
+	update(t, l0, r0);
+}
+//求线段树中区间(l, r)的区间长度，(l0, r0)是线段树的初始节点区间
+int segtree::seg_len(int t, int l0, int r0, int l, int r){
+	if(cnt[t]||(l0==l&&r0==r))
+		return len[t];
+	else{
+		int m0 = (l0+r0)>>1;
+		int ret = 0;
+		if(l<m0)
+			ret += seg_len(t+t, l0, m0, l, m0<r ? m0 : r);
+		if(r>m0)
+			ret += seg_len(t+t+1, m0, r0, l, m0>l ? m0 : l, r);
+
+		return ret;
+	}
+}
+
+//求线段树中区间(l, r)的连续线段数，(l0, r0)是线段树的初始节点区间
+int segtree::seg_cut(int t, int l0, int r0, int l, int r){
+	if(cnt[t])
+		return 1;
+	if(l0==l&&r0==r)
+		return cut[t];
+	else{
+		int m0 = (l0+r0)>>1;
+		int ret = 0;
+		if(l<m0){
+			ret += seg_cut(t+t, l0, m0, l, m0<r ? m0 : r);
+		}
+		if(r>m0){
+			ret += seg_cut(t+t+1, m0, r0, m0>l ? m0 : l, r);
+		}
+		if(l<m0&&r>m0&&br[t+t]&&bl[t+t+1])
+			ret--;
+		return ret;
+	}
+}
+#+END_SRC
+
 * Fenwick Tree (Binary Indexed Tree)
 
 ** 1-dim

@@ -1,5 +1,5 @@
 #+TITLE: Number Theory
-#+DATE: <2013-08-02 Fri>
+#+DATE: <2013-08-06 Tue>
 
 * GCD (Greatest Common Divisor)
 
@@ -8,7 +8,7 @@
 - \(\gcd(a, b) = \gcd(b, a \bmod b)\)
 #+begin_src cpp
 int gcd(int a,int b) {
-	return b ? gcd(b, a%b) : a;
+    return b ? gcd(b, a%b) : a;
 }
 #+end_src
 
@@ -98,7 +98,7 @@ ll ex_gcd(ll a, ll b, ll& x, ll& y)
    | 10^11 |   4,118,054,813 |
    | 10^12 |  37,607,912,018 |
    | 10^13 | 346,065,536,839 |
-   
+
 ** Sieve of Eratosthenes
 
 #+begin_src cpp
@@ -120,15 +120,15 @@ int primes[664590];
 void Sieve_of_Eratosthenes()
 {
     for (int i = 4; i <= Limit; i += 2) sieve[i] = 1;
-	for (int i = 3; i * i <= Limit; i += 2)
+    for (int i = 3; i * i <= Limit; i += 2)
         if (!sieve[i])
             for (int j = i * i; j <= Limit; j += i)
                 sieve[j] = 1;
-    
+
     primes[0] = 1; primes[1] = 2;
-	for(int i = 3; i <= Limit; i += 2)
-		if(!sieve[i])
-			primes[++ primes[0]] = i;
+    for(int i = 3; i <= Limit; i += 2)
+        if(!sieve[i])
+            primes[++ primes[0]] = i;
 }
 
 
@@ -172,7 +172,7 @@ void Sieve_of_Atkin()
         if (sieve[r])
             for (int i = r*r; i <= Limit; i += r*r)
                 sieve[i] = 0;
-    
+
     primes[0] = primes[1] = 2; primes[2] = 3;
     for (int a = 5; a <= Limit; ++ a)
         if (sieve[a])
@@ -184,9 +184,9 @@ void test(char *title, void run())
 {
     time_t op, ed;
     op = clock();
-    
+
     run();
-    
+
     ed = clock();
 
     double dif = (ed - op) * 1000.0 / CLOCKS_PER_SEC;
@@ -199,11 +199,11 @@ int main(int argc, char *argv[])
 {
     test("Sieve of Eratosthenes",
          Sieve_of_Eratosthenes);
-    
+
     memset(sieve, 0, sizeof(sieve));
     test("Sieve of Eratosthenes 2",
          Sieve_of_Eratosthenes_2);
-    
+
     memset(sieve, 0, sizeof(sieve));
     test("Sieve of Atkin",
          Sieve_of_Atkin);
@@ -215,13 +215,435 @@ int main(int argc, char *argv[])
 
 - http://blog.ac521.org/?p=533
 
+*** poj 1811
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <ctime>
+using namespace std;
+
+typedef long long LL;
+
+const int S = 20;
+
+
+LL muti_mod(LL a, LL b, LL c){ //返回(a*b) mod c,a,b,c<2^63
+	a %= c;
+	b %= c;
+	LL ret = 0;
+	while(b){
+		if(b&1){
+			ret += a;
+			if(ret>=c)
+				ret -= c;
+		}
+		a <<= 1;
+		if(a>=c)
+			a -= c;
+		b >>= 1;
+	}
+	return ret;
+}
+
+LL pow_mod(LL x, LL n, LL mod){ //返回x^n mod c ,非递归版
+	if(n==1)
+		return x%mod;
+	int bit[64], k = 0;
+	while(n){
+		bit[k++] = n&1;
+		n >>= 1;
+	}
+	LL ret = 1;
+	for(k = k-1; k>=0; k--){
+		ret = muti_mod(ret, ret, mod);
+		if(bit[k]==1)
+			ret = muti_mod(ret, x, mod);
+	}
+	return ret;
+}
+
+bool check(LL a, LL n, LL x, LL t){ //以a为基，n-1=x*2^t，检验n是不是合数
+	LL ret = pow_mod(a, x, n), last = ret;
+	for(int i = 1; i<=t; i++){
+		ret = muti_mod(ret, ret, n);
+		if(ret==1&&last!=1&&last!=n-1)
+			return 1;
+		last = ret;
+	}
+	if(ret!=1)
+		return 1;
+	return 0;
+}
+
+bool Miller_Rabin(LL n){
+	LL x = n-1, t = 0;
+	while((x&1)==0)
+		x >>= 1, t++;
+	bool flag = 1;
+	if(t>=1&&(x&1)==1){
+		for(int k = 0; k<S; k++){
+			LL a = rand()%(n-1)+1;
+			if(check(a, n, x, t)){
+				flag = 1;
+				break;
+			}
+			flag = 0;
+		}
+	}
+	if(!flag||n==2)
+		return 0;
+	return 1;
+}
+
+LL gcd(LL a, LL b){
+	if(a==0)
+		return 1;
+	if(a<0)
+		return gcd(-a, b);
+	while(b){
+		LL t = a%b;
+		a = b;
+		b = t;
+	}
+	return a;
+}
+
+LL Pollard_rho(LL x, LL c){
+	LL i = 1, x0 = rand()%x, y = x0, k = 2;
+	while(1){
+		i++;
+		x0 = (muti_mod(x0, x0, x)+c)%x;
+		LL d = gcd(y-x0, x);
+		if(d!=1&&d!=x){
+			return d;
+		}
+		if(y==x0)
+			return x;
+		if(i==k){
+			y = x0;
+			k += k;
+		}
+	}
+}
+
+vector<LL> v;
+
+void findFact(LL n)
+{
+	if (!Miller_Rabin(n)) {
+		v.push_back(n);
+		return ;
+	}
+	LL p = n;
+	while (p>=n)
+		p = Pollard_rho(p, rand()%(n-1)+1);
+	findFact(p);
+	findFact(n/p);
+}
+
+int main()
+{
+	srand(time(NULL));
+	LL n;
+	while (cin >> n && n != -1)
+	{
+		//cerr << n;
+		v.clear();
+		findFact(n);
+		sort(v.begin(),v.end());
+		for (int i = 0; i < v.size(); i ++)
+			cout << "    " << v[i] << endl;
+		cout << endl;
+	}
+}
+#+END_SRC
+
+*** poj 2429 求一合数分解为两数和最小的情况
+
+#+BEGIN_SRC cpp
+#include <algorithm>
+#include <iostream>
+#include <string.h>
+#include <stdio.h>
+using namespace std;
+typedef __int64 L;
+typedef unsigned __int64 UL;
+const int COUNT = 6;
+L allFactor[65], nFactor;
+L fMultiModular(const L & a, L b, const L & n){
+	L back(0), tmp(a%n);
+	while(b>0){
+		if(b&0x1){
+			if((back = back+tmp)>n)
+				back -= n;
+		}
+		if((tmp <<= 1)>n)
+			tmp -= n;
+		b >>= 1;
+	}
+	return back;
+}
+L modular_exp(const L & a, L b, const L & n){
+	L d(1), tmp(a%n);
+	while(b>0){
+		if(b&0x1)
+			d = fMultiModular(d, tmp, n);
+		tmp = fMultiModular(tmp, tmp, n);
+		b >>= 1;
+	}
+	return d;
+}
+L GCD(L a, L b){
+	L c;
+	while(b){
+		c = b;
+		b = a%b;
+		a = c;
+	}
+	return a;
+}
+L pollard_rho(const L & c, const L & num){
+	int i(1), k(2);
+	L x = rand()%num;
+	L y = x, comDiv;
+	do{
+		i++;
+		if((x = fMultiModular(x, x, num)-c)<0)
+			x += num;
+		if(x==y)
+			break;
+		comDiv = GCD((y-x+num)%num, num);
+		if(comDiv>1&&comDiv<num)
+			return comDiv;
+		if(i==k){
+			y = x;
+			k <<= 1;
+		}
+	}while(1);
+	return num;
+}
+bool fWitNess(const L & a, const L & n, char t, const L & u){
+	L x, y;
+	x = modular_exp(a, u, n);
+	while(t--){
+		y = fMultiModular(x, x, n);
+		if(y==1&&x!=1&&x!=n-1)
+			return true;
+		x = y;
+	}
+	return y!=1;
+}
+bool miller_rabin(const L & n, int cnt){
+	if(n==1)
+		return false;
+	if(n==2)
+		return true;
+	L a, u;
+	char t(0);
+	for(u = n-1; !(u&0x1); u >>= 1)
+		t++;
+	for(int i = 1; i<=cnt; i++){
+		a = rand()%(n-1)+1;
+		if(fWitNess(a, n, t, u))
+			return false;
+	}
+	return true;
+}
+void fFindFactor(const L & num){
+	if(miller_rabin(num, COUNT)){
+		allFactor[++nFactor] = num;
+		return;
+	}
+	L factor;
+	do{
+		factor = pollard_rho(rand()%(num-1)+1, num);
+	}while(factor>=num);
+	fFindFactor(factor);
+	fFindFactor(num/factor);
+}
+UL NumFactor[650];
+int Num[65], Len;
+void Factorize(const L & N){
+	L tmp = N;
+	Len = 0;
+	memset(Num, 0, sizeof(Num));
+	nFactor = 0;
+	fFindFactor(tmp);
+	sort(allFactor+1, allFactor+nFactor+1);
+	NumFactor[0] = allFactor[1];
+	Num[0] = 1;
+	for(int i = 2; i<=nFactor; i++){
+		if(NumFactor[Len]!=allFactor[i])
+			NumFactor[++Len] = allFactor[i];
+		Num[Len]++;
+	}
+}
+UL key, a, b, mmin, gcd, lcm, res_a, res_b;
+UL num1Factor[650];
+int num1[65], len1;
+void DFS(int cur, UL value){
+	UL s = 1;
+	if(cur==len1+1){
+		a = value;
+		b = key/value;
+		if(GCD(a, b)==1){
+			a *= gcd;
+			b *= gcd;
+			if(a+b<mmin){
+				mmin = a+b;
+				res_a = a<b ? a : b;
+				res_b = a>b ? a : b;
+			}
+		}
+		return;
+	}
+	for(int i = 0; i<=num1[cur]; i++){
+		if(value*s>=mmin)
+			return;
+		DFS(cur+1, value*s);
+		s *= num1Factor[cur];
+	}
+}
+int main(){
+	while(scanf("%I64u%I64u", &gcd, &lcm)!=EOF){
+		if(gcd==lcm){
+			printf("%I64u %I64u\n", gcd, lcm);
+			continue;
+		}
+		key = lcm/gcd;
+		memset(num1Factor, 0, sizeof(num1Factor));
+		memset(num1, 0, sizeof(num1));
+		len1 = 0;
+		Factorize(key);
+		memcpy(num1Factor, NumFactor, sizeof(NumFactor));
+		memcpy(num1, Num, sizeof(Num));
+		len1 = Len;
+		mmin = -1;
+		DFS(0, 1);
+		printf("%I64u %I64u\n", res_a, res_b);
+	}
+	return 0;
+}
+#+END_SRC
+
+*** SQUFOF
+
+#+BEGIN_SRC cpp
+/*==================================================*\
+ * SQUFOF因子分解,10^18以内因子分解的最快算法
+ * 用法：
+ * 1、所有case之前调用一次init()
+ * 2、连续使用analyze(合数N)，每次不需重新初始化
+ * 返回：合数N的一个因子
+ * 注意：
+ * 1、N不能太大，最好<2^54,以防溢出
+ * 2、TABLE_SIZE的值不能更改
+ * 3、U32不能用int代替
+ * 4、不会因为N有小因子而更快，请先试除小因子
+ \*==================================================*/
+typedef unsigned long long U64;
+typedef unsigned int U32;
+const U32 MAX_INDEEP = 10000;
+const U32 TABLE_SIZE = 131071;
+U32 sqrt_table[TABLE_SIZE] = {0};
+class squfof{
+	U32 try_ana(U64 N){
+		U32 sqrt_n = (U32) sqrt((long double) N);
+		U32 P1 = sqrt_n, Q2 = 1, Q1 = N-(U64) P1*P1;
+		U32 B, P, Q, step = MAX_INDEEP;
+		if(Q1==0)
+			return P1;
+		while(sqrt_table[Q1%TABLE_SIZE]!=Q1){
+			B = (sqrt_n+P1)/Q1;
+			P = B*Q1-P1;
+			Q = Q2+B*(P1-P);
+			P1 = P;
+			Q2 = Q1;
+			Q1 = Q;
+		}
+		U32 sqrt_Qi = (U32) sqrt((long double) Q1);
+		B = (sqrt_n-P1)/sqrt_Qi;
+		P1 = B*sqrt_Qi+P;
+		Q2 = sqrt_Qi;
+		Q1 = (N-(U64) P1*P1)/Q2;
+		P = P1;
+		P1 = 0;
+		while(P!=P1&&step--){
+			P1 = P;
+			B = (sqrt_n+P1)/Q1;
+			P = B*Q1-P1;
+			Q = Q2+B*(P1-P);
+			Q2 = Q1;
+			Q1 = Q;
+		}
+		return P;
+	}
+public:
+	init(){
+		for (U32 i = 0; i < (1 << 16); i++)
+		sqrt_table[i * i % TABLE_SIZE] = i * i;
+	}
+	U32 analyze(U64 N){
+		U32 k, t = 0;
+		for(k = 1; t==0||t==1; k++){
+			t = __gcd(try_ana(k*N), N);
+		}
+		return t;
+	}
+};
+#+END_SRC
+
 * 因数
 
 + [[http://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=2716][UVA/11669 - Non-Decreasing Prime Sequence]]
   - Q: 一数范围[a, b]中所有数按素因子序列长度排序（如10为2,2,5），长度相同时按字典序排。问第k小数的素因子序列。
   - A: O(n) 分解 2 ~ 1000000 质因子，排序后转化为区间第k小数问题（划分树）。
-    
+
 * Modular Arithmetic
+
+** Knowledge
+
+*** a%b%c is not always equals to a%c%b
+
+*** unconcened
+模运算及其性质
+
+　　本文以c++语言为载体，对基本的模运算应用进行了分析和程序设计，以理论和实际相结合的方法向大家介绍模运算的基本应用。。
+基本理论
+　　基本概念：
+　　给定一个正整数p，任意一个整数n，一定存在等式 n = kp + r ；
+　　其中k、r是整数，且 0 ≤ r < p，称呼k为n除以p的商，r为n除以p的余数。
+　　对于正整数p和整数a,b，定义如下运算：
+　　取模运算：a % p（或a mod p），表示a除以p的余数。
+　　模p加法：(a + b) % p ，其结果是a+b算术和除以p的余数，也就是说，(a+b) = kp +r，则(a + b) % p = r。
+　　模p减法：(a-b) % p ，其结果是a-b算术差除以p的余数。
+　　模p乘法：(a * b) % p，其结果是 a * b算术乘法除以p的余数。
+　　说明：
+　　1. 同余式：正整数a，b对p取模，它们的余数相同，记做 a ≡ b % p或者a ≡ b (mod p)。
+　　2. n % p得到结果的正负由被除数n决定,与p无关。例如：7%4 = 3， -7%4 = -3， 7%-4 = 3， -7%-4 = -3。
+基本性质
+　　（1）若p|(a-b)，则a≡b (% p)。例如 11 ≡ 4 (% 7)， 18 ≡ 4(% 7)
+　　（2）(a % p)=(b % p)意味a≡b (% p)
+　　（3）对称性：a≡b (% p)等价于b≡a (% p)
+　　（4）传递性：若a≡b (% p)且b≡c (% p) ，则a≡c (% p)
+运算规则
+　　模运算与基本四则运算有些相似，但是除法例外。其规则如下：
+　　(a + b) % p = (a % p + b % p) % p （1）
+　　(a - b) % p = (a % p - b % p) % p （2）
+　　(a * b) % p = (a % p * b % p) % p （3）
+　　(a^b) % p = ((a % p)^b) % p （4）
+　　结合率： ((a+b) % p + c) % p = (a + (b+c) % p) % p （5）
+　　((a*b) % p * c)% p = (a * (b*c) % p) % p （6）
+　　交换率： (a + b) % p = (b+a) % p （7）
+　　(a * b) % p = (b * a) % p （8）
+　　分配率： ((a +b)% p * c) % p = ((a * c) % p + (b * c) % p) % p （9）
+　　重要定理：若a≡b (% p)，则对于任意的c，都有(a + c) ≡ (b + c) (%p)；（10）
+　　若a≡b (% p)，则对于任意的c，都有(a * c) ≡ (b * c) (%p)；（11）
+　　若a≡b (% p)，c≡d (% p)，则 (a + c) ≡ (b + d) (%p)，(a - c) ≡ (b - d) (%p)，
+　　(a * c) ≡ (b * d) (%p)，(a / c) ≡ (b / d) (%p)； （12）
+　　若a≡b (% p)，则对于任意的c，都有ac≡ bc (%p)； （13）
 
 ** Modular Exponentiation
 
@@ -405,12 +827,12 @@ mod_p Chinese_Remainer_Non_Coprime(vector<mod_p> C)
 - [[http://acm.hdu.edu.cn/showproblem.php?pid=1573][HDU/1573 - X问题]]
   - Q: 求非互质同余方程组解\(1 \leq x \leq n\)的个数
   - A: 注意0不是解
-    
+
 ** Fermat's little theorem
 
 - 若\(p\)为质数，\(\large a^{p} \equiv a \pmod{p}\)
 - 若\(a\)不是\(p\)的倍数，\(\large a^{p-1} \equiv 1 \pmod{p}\)
-  
+
 ** Euler's theorem
 
 - 若\(a\),\(n\)互质，\(\large a^{\varphi(n)} \equiv 1 \pmod{n}\)
@@ -418,16 +840,16 @@ mod_p Chinese_Remainer_Non_Coprime(vector<mod_p> C)
 #+begin_src cpp
 int eular(int n)
 {
-	int r = n;
-	for(int i = 2; i * i <= n; ++ i)
+    int r = n;
+    for(int i = 2; i * i <= n; ++ i)
         if(n % i == 0) {
             r -= r/i;
             while(n % i == 0)
                 n /= i;
         }
-	if(n != 1)
+    if(n != 1)
         r -= r/n;
-	return r;
+    return r;
 }
 #+end_src
 - 预处理版本
@@ -463,11 +885,11 @@ void euler()
 //how many p in n!
 int prime_factorial(int p, int n)
 {
-	int cnt = 0, r = n/p;
-	while (r) {
-		cnt+=r; r/=p;
-	}
-	return cnt;
+    int cnt = 0, r = n/p;
+    while (r) {
+        cnt+=r; r/=p;
+    }
+    return cnt;
 }
 #+end_src
 
@@ -486,3 +908,28 @@ see: http://en.wikipedia.org/wiki/Digital_root
 
 + [[http://acm.hdu.edu.cn/showproblem.php?pid=4350][HDU/4350 - Card]]
   - A: 可从相对位置不变（环）推得，最小循环长度为\(\frac{R}{\gcd(R,R-L+1)}\)。
+    
+* Others
+
+#+BEGIN_EXAMPLE
+1. 1
+2. 12
+3. 123
+   ...
+n. 123456789101112...
+...
+每一组数字都比上一组长 (int)log10((double)i) + 1
+#+END_EXAMPLE
+
+** bit
+
+- 位操作实现技巧
+  1) 如果要获得第i位的数据，判断((data&(0X<<i))==0),若真，为0，假，为1；
+  2) 如果要设置第i位为1，data=(data|(0X1<<i)); 
+  3) 如果要设置第i位为0，data=(data&(~(0X1<<i))); 
+  4) 如果要将第i位取反，data=(data^(0X1<<i); 
+  5) 如果要取出一个数的最后一个1(lowbit)：(data&(-data)) 
+
+** number to rome
+
+zoj3501
