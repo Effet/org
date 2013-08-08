@@ -2,30 +2,6 @@
 #+DATE: <2013-08-05 Mon>
 #+TEXT: *The World's Best OS.*
 
-* Distros
-
-** ArchLinux
-
-*** [[file:eeepc_x101_installed_archlinux.org][my eeepc x101 installed archlinux]]
-
-*** [[file:archlinux_tips.org][some tips]]
-
-** Gentoo
-
-*** [[file:gentoo_tips.org][some tips]]
-
-** Fedora
-
-*** [[file:fedora_tips.org][some tips]]
-
-* Network Sharing
-
-[[file:../misc/network_sharing.org::*Linux][MORE DETAIL]]
-
+* [[file:~/proj/org/misc/network_sharing.org::*Linux][Network Sharing]]
 * [[file:windows_stuff_in_linux.org][Some Windows Program/Commands in Linux]]
-
-* [[file:git.org][GIT]]
-
-* [[file:ssh.org][SSH]]
-
 * [[file:linux_tips.org][Tips]]
