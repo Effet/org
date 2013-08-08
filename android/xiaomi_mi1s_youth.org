@@ -1,5 +1,5 @@
 #+TITLE: Xiaomi MI1S Youth
-#+DATE: <2013-08-07 Wed>
+#+DATE: <2013-08-08 Thu>
 
 * this link
 - http:www.xiaomi.com/mi1syouth

@@ -1,5 +1,5 @@
 #+TITLE: My Linux Journey
-#+DATE: <2013-08-05 Mon>
+#+DATE: <2013-08-08>
 #+TEXT: *The World's Best OS.*
 
 * [[file:~/proj/org/misc/network_sharing.org::*Linux][Network Sharing]]

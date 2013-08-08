@@ -1,6 +1,8 @@
 #+TITLE: ArchLinux Tips
-#+DATE: <2013-08-02 Fri>
+#+DATE: <2013-08-08>
 
 * pacnew
-
 https://wiki.archlinux.org/index.php/Pacnew_and_Pacsave_Files
+
+* pacman -Sc
+clean caches
