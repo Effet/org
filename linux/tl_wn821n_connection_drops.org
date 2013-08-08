@@ -1,0 +1,17 @@
+#+TITLE: TL-WN821N Connection Drops
+#+DATE: <2013-08-06 Tue>
+
+the firmware is AR9287
+
+* find many bug report, but I havnt solve this problem.
+
+https://bbs.archlinux.org/viewtopic.php?id=129344
+http://forums.hak5.org/index.php?/topic/27821-trouble-with-wlan1/
+https://bugzilla.redhat.com/show_bug.cgi?id=755370
+https://bbs.archlinux.org/viewtopic.php?pid=1057181
+https://bbs.archlinux.org/viewtopic.php?id=137643
+http://ubuntuforums.org/archive/index.php/t-1843638.html
+http://forums.gentoo.org/viewtopic-t-945600-start-0.html
+http://en.it-usenet.org/thread/18467/5452/
+
+* I think some problem relatied to OVER-HEATED?
