@@ -1,0 +1,7 @@
+#+TITLE: bash tips
+#+DATE: <2013-08-09>
+
+* get the last argument of privious line
+#+BEGIN_EXAMPLE
+<Alt>+.
+#+END_EXAMPLE
