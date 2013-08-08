@@ -2,6 +2,6 @@
 #+DATE: <2013-08-08>
 #+TEXT: *The World's Best OS.*
 
-* [[file:~/proj/org/misc/network_sharing.org::*Linux][Network Sharing]]
+* [[file:../misc/network_sharing.org::*Linux][Network Sharing]]
 * [[file:windows_stuff_in_linux.org][Some Windows Program/Commands in Linux]]
 * [[file:linux_tips.org][Tips]]
