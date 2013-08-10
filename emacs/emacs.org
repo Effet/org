@@ -20,6 +20,7 @@ C-u 0 C-k
 https://github.com/salborini/emacs-installer
 my fork: https://github.com/ironyKuU/emacs-installer
 
+* http://stackoverflow.com/questions/4987760/how-to-change-size-of-split-screen-emacs-windows
 * Key-analysing (keyfreq)
 
 http://ergoemacs.org/emacs/command-frequency.html
@@ -28,3 +29,4 @@ http://ergoemacs.org/emacs/command-frequency.html
 
 Note for org-mode.
 [[file:org.org][SEE MORE]]
+

@@ -1,5 +1,5 @@
 #+TITLE: Linux Tips
-#+DATE: <2013-08-02 Fri>
+#+DATE: <2013-08-10>
 
 * Simple Http Server
 
@@ -54,3 +54,21 @@ EndSection
 #+end_src
 
 ** Xmodmap
+** check run
+   http://stackoverflow.com/questions/298760/how-to-make-sure-an-application-keeps-running-on-linux
+
+* TODO tmux & teamocil
+http://webdizz.name/blog/2013/01/19/tmux-with-teamocil/
+
+* python
+http://flask.pocoo.org/
+http://webpy.org/
+
+* TODO mysql
+http://stackoverflow.com/questions/3334619/cannot-delete-or-update-a-parent-row-a-foreign-key-constraint-fails
+
+* TODO cron
+https://en.wikipedia.org/wiki/Cron
+
+* iptables
+http://en.wikipedia.org/wiki/Iptables

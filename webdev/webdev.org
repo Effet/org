@@ -1,5 +1,11 @@
 #+TITLE: Web Developing
-#+DATE: <2013-08-06 Tue>
+#+DATE: <2013-08-10>
 
 * [[file:web_developing_tips.org][some tips]]
 * [[file:wsgi.org][WSGI]]
+* Http
+** status code
+http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+
+* port number
+http://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers

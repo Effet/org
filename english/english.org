@@ -1,5 +1,5 @@
 #+TITLE: English Learning
-#+DATE: <2013-08-02 Fri>
+#+DATE: <2013-08-10>
 
 * Dictionary
 
@@ -9,7 +9,7 @@
       http://sourceforge.net/projects/goldendict/files/dictionaries/
    2. morphologies
       http://sourceforge.net/projects/goldendict/files/better%20morphologies/1.0/
-      
+
 * by which / in which
 
 http://tw.knowledge.yahoo.com/question/question?qid=1012030601485
@@ -18,3 +18,8 @@ http://tw.knowledge.yahoo.com/question/question?qid=1012030601485
 
 http://oxforddictionaries.com/words/that-or-which
 http://grammar.quickanddirtytips.com/which-versus-that.aspx
+
+* have been studying / have studied
+http://www.italki.com/question/104535
+
+http://www.dailywritingtips.com/greek-words/
