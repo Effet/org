@@ -1,0 +1,8 @@
+#+TITLE: archiso
+#+DATE: <2013-08-15>
+
+* build iso
+- https://wiki.archlinux.org/index.php/Building_a_Live_CD
+- https://wiki.archlinux.org/index.php/Archiso
+- http://blog.jakgibb.com/2011/09/07/creating-a-custom-arch-linux-live-usb/
+- https://wiki.archlinux.org/index.php/Remastering_the_Install_ISO
