@@ -1,5 +1,5 @@
 #+TITLE: GIT
-#+DATE: <2013-08-02 Fri>
+#+DATE: <2013-08-14>
 
 * 分治合并
 
@@ -32,4 +32,11 @@ also can use
 
 #+BEGIN_SRC sh
 git status --ignore-submodules[=<when>]
+#+END_SRC
+
+* remove untrack files
+
+http://stackoverflow.com/questions/61212/removing-untracked-files-from-your-git-working-copy
+#+BEGIN_SRC sh
+git clean -f
 #+END_SRC

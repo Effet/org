@@ -1,7 +1,11 @@
 #+TITLE: My Linux Journey
-#+DATE: <2013-08-08>
+#+DATE: <2013-08-28>
 #+TEXT: *The World's Best OS.*
 
 * [[file:../misc/network_sharing.org::*Linux][Network Sharing]]
+* Usage of OS
+http://en.wikipedia.org/wiki/Usage_share_of_operating_systems
+
+* [[file:~/proj/org/misc/network_sharing.org::*Linux][Network Sharing]]
 * [[file:windows_stuff_in_linux.org][Some Windows Program/Commands in Linux]]
 * [[file:linux_tips.org][Tips]]
