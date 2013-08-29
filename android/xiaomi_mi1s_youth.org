@@ -1,5 +1,5 @@
 #+TITLE: Xiaomi MI1S Youth
-#+DATE: <2013-08-08 Thu>
+#+DATE: <2013-08-28>
 
 * this link
 - http:www.xiaomi.com/mi1syouth
@@ -24,12 +24,19 @@ there are two version of rom
 - Ultra-Slim Gapps Packs [CM 10/10.1]
   - http://forum.xda-developers.com/showthread.php?t=2303898
 
-* starup in reconvery
+* Physical Keys
+
+** starup in reconvery
 #+BEGIN_EXAMPLE
 Power+VolumeUp
 #+END_EXAMPLE
 
-* starup in fastboot
+** starup in fastboot
 #+BEGIN_EXAMPLE
 Power+VolumeUp/Down+PhotoKey
+#+END_EXAMPLE
+
+** quick shot photo
+#+BEGIN_EXAMPLE
+Power+VolumeUp
 #+END_EXAMPLE
