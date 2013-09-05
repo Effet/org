@@ -1,0 +1,9 @@
+#+TITLE: Apache Maven
+#+DATE: <2013-09-03>
+
+* webapp
+
+http://maven.apache.org/guides/mini/guide-webapp.html
+#+BEGIN_SRC sh
+mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-webapp -DarchetypeArtifactId=maven-archetype-webapp
+#+END_SRC
