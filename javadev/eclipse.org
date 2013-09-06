@@ -1,0 +1,10 @@
+#+TITLE: Eclipse
+#+DATE: <2013-09-05>
+
+* Runtime Options
+
+** for debug
+
+#+BEGIN_SRC sh
+$ECLIPE_HOME/eclipse -nosplash -consolelog -debug
+#+END_SRC

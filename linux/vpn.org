@@ -1,0 +1,12 @@
+#+title: VPN in Linux
+#+DATE: <2013-09-06>
+
+* PPTP
+
+** Firewall Rules
+
+#+BEGIN_SRC sh
+iptables --append INPUT --protocol 47 --jump ACCEPT
+iptables --append INPUT --protocol tcp --match tcp \
+         --destination-port 1723 --jump ACCEPT
+#+END_SRC

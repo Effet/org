@@ -1,0 +1,8 @@
+#+TITLE: Android Developing
+#+DATE: <2013-09-05>
+
+* sites
+
+https://developer.android.com/
+http://gregorygrubbs.com/development/tips-on-android-development-using-emacs/
+http://www.gpgkd906.com/archives/1465
