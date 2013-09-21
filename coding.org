@@ -1,0 +1,8 @@
+javaBean: http://stackoverflow.com/questions/3295496/what-is-a-java-bean-exactly
+
+* C/C++/Qt
+** pointer vs "auto" variable
+   http://stackoverflow.com/questions/658133/c-when-to-use-pointers
+   http://stackoverflow.com/questions/397263/when-to-use-pointers-and-when-not-to
+   http://qt-project.org/forums/viewthread/28016
+   http://qt-project.org/forums/viewthread/10160
