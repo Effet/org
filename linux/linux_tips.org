@@ -1,5 +1,5 @@
 #+TITLE: Linux Tips
-#+DATE: <2013-08-10>
+#+DATE: <2013-09-25>
 
 * Simple Http Server
 
@@ -72,3 +72,11 @@ https://en.wikipedia.org/wiki/Cron
 
 * iptables
 http://en.wikipedia.org/wiki/Iptables
+
+* rm
+
+http://unix.stackexchange.com/questions/92081/scripting-rm-and-rm-i
+
+#+BEGIN_SRC sh
+alias rm='rm -I'
+#+END_SRC
