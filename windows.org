@@ -1,0 +1,8 @@
+#+TITLE: MS-Windows
+#+DATE: <2013-09-26>
+
+* package manager
+
+http://en.wikipedia.org/wiki/List_of_software_package_management_systems#Microsoft_Windows
+
+* cygwin
