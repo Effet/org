@@ -1,5 +1,5 @@
 #+TITLE: Linux Tips
-#+DATE: <2013-09-25>
+#+DATE: <2013-09-26>
 
 * Simple Http Server
 
@@ -80,3 +80,7 @@ http://unix.stackexchange.com/questions/92081/scripting-rm-and-rm-i
 #+BEGIN_SRC sh
 alias rm='rm -I'
 #+END_SRC
+
+* lsof
+
+http://en.wikipedia.org/wiki/Lsof
