@@ -1,4 +1,9 @@
-javaBean: http://stackoverflow.com/questions/3295496/what-is-a-java-bean-exactly
+#+TITLE: Coding
+#+DATE: <2013-09-26>
+
+* javaBean
+
+http://stackoverflow.com/questions/3295496/what-is-a-java-bean-exactly
 
 * C/C++/Qt
 ** pointer vs "auto" variable
