@@ -1,0 +1,24 @@
+#+TITLE: Linux Graphic
+#+DATE: <2013-09-07>
+
+* screan
+
+** information
+
+*** resolution
+
+#+BEGIN_SRC sh
+xdpyinfo | grep resolution
+#+END_SRC
+
+*** dimensions
+
+#+BEGIN_SRC sh
+xdpyinfo | grep dimensions
+#+END_SRC
+
+** wallpaper
+
+*** convert
+
+http://superuser.com/questions/275127/resizing-and-cropping-images-to-6x4-to-width-of-1024
