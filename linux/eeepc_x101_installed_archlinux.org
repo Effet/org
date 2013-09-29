@@ -1,5 +1,5 @@
-#+TITLE: install archlinux in eeepc x101
-#+DATE: <2013-03-03 Sun>
+#+TITLE: Install Archlinux in Eeepc x101
+#+DATE: <2013-09-29>
 #+TEXT: This section details archlinux in my eeepc x101 notebook.
 
 * Disk Infomation
@@ -126,3 +126,151 @@ pacman -S vim emacs \
           mplayer feh
           rxvt-unicode zathura
 #+end_src
+
+
+
+* New Start
+
+#+BEGIN_SRC sh
+### HW Disk
+fdisk /dev/sda
+
+### Time
+ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+
+### Locale
+TODO: sed '..' -i /etc/locale.gen
+/usr/bin/locale-gen
+echo "LANG=\"en_US.UTF-8\"" > /etc/locale.conf
+
+
+### Bootloader (syslinux)
+# https://wiki.archlinux.org/index.php/Syslinux
+pacman -S syslinux
+syslinux-install_update -i -a -m
+vi /boot/syslinux/syslinux.cfg
+
+
+### SSD
+# https://wiki.archlinux.org/index.php/Solid_State_Drives
+## TRIM
+vi /etc/fstab  # add `discard' and `noatime' to ext4 line
+
+## I/O Scheduler
+# https://wiki.archlinux.org/index.php/Solid_State_Drives#Using_udev_for_one_device_or_HDD.2FSSD_mixed_environment
+cat > /etc/udev/rules.d/60-schedulers.rule << EOF
+# set deadline scheduler for non-rotating disks
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="deadline"
+
+# set cfq scheduler for rotating disks
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="cfq"
+EOF
+
+
+### Root passwd & reboot
+passwd
+unmount /mnt/{boot,}
+reboot
+
+
+### Yaourt
+# https://wiki.archlinux.org/index.php/Yaourt
+# http://archlinux.fr/yaourt-en#get_it
+CUR_DIR=`pwd`
+BUD_DIR=/tmp/install_yaourt
+mkdir -p $BUD_DIR && cd $BUD_DIR
+curl -O https://aur.archlinux.org/packages/pa/package-query/package-query.tar.gz
+tar zxvf package-query.tar.gz
+cd package-query
+makepkg -si
+cd ..
+curl -O https://aur.archlinux.org/packages/ya/yaourt/yaourt.tar.gz
+tar zxvf yaourt.tar.gz
+cd yaourt
+makepkg -si
+cd ..
+rm -rf $BUD_DIR
+cd $CUR_DIR
+unset CUR_DIR
+unset BUD_DIR
+
+### Network
+pacman -S wpa_supplicant
+
+### Devel
+pacman -S python python-pip python-virtualenv
+pacman -S python2
+
+### Wireless
+pacman -S iw
+
+### CPU
+# https://wiki.archlinux.org/index.php/lm_sensors
+pacman -S lm_sensors
+
+### Add a normal user
+# https://wiki.archlinux.org/index.php/Users_and_Groups#User_management
+useradd -m -g users -s /bin/bash kuu
+usermod -aG wheel kuu
+passwd kuu
+#+END_SRC
+
+* sounds control
+
+#+BEGIN_SRC sh
+pacman -S alsa-utils
+#+END_SRC
+
+* Graphic
+
+#+BEGIN_SRC sh
+### Drivers
+pacman -S xf86-video-intel
+pacman -S xf86-input-synaptics
+
+### Xorg
+pacman -S xorg-server
+# for `startx'
+pacman -S xorg-xinit
+
+### WM
+pacman -S i3
+pacman -S conky
+
+### Terminals
+pacman -S rxvt-unicode
+
+#+END_SRC
+
+* Fonts
+
+#+BEGIN_SRC sh
+pacman -S ttf-dejavu
+pacman -S terminus-font
+#+END_SRC
+
+* personal configs
+
+** git
+
+#+BEGIN_SRC sh
+pacman -S git
+#+END_SRC
+
+#+BEGIN_SRC sh
+git config --global user.name ironyKuU
+git config --global user.email nesuadark@gmail.com
+#+END_SRC
+
+check infomation
+#+BEGIN_SRC sh
+git config --list
+#+END_SRC
+
+** dotfiles
+
+#+BEGIN_SRC sh
+cd ~
+git clone https://github.com/ironyKuU/dotfiles.git
+#+END_SRC
