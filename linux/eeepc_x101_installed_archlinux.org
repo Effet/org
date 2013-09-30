@@ -72,6 +72,10 @@ cd yaourt
 makepkg -si
 cd ..
 
+### Kernel
+yaourt -S kernel-netbook
+vi /boot/syslinux/syslinux.cfg
+
 ### Network
 pacman -S wpa_supplicant iw
 
@@ -80,7 +84,8 @@ pacman -S wpa_supplicant iw
 pacman -S lm_sensors
 
 ### acpi
-pacman -S acpid acpi-eeepc-generic rfkill
+pacman -S acpid rfkill
+yaourt -S acpi-eeepc-generic 
 #+END_SRC
 
 * Graphic
