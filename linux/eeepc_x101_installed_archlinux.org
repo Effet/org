@@ -1,133 +1,6 @@
 #+TITLE: Install Archlinux in Eeepc x101
-#+DATE: <2013-09-29>
+#+DATE: <2013-09-30>
 #+TEXT: This section details archlinux in my eeepc x101 notebook.
-
-* Disk Infomation
-
-#+begin_src sh
-parted /dev/sda u s p
-#+end_src
-#+begin_example
-Model: ATA JMicron (scsi)
-Disk /dev/sda: 15740928s
-Sector size (logical/physical): 512B/512B
-Partition Table: gpt
-Disk Flags:
-
-Number  Start    End        Size       File system  Name       Flags
- 1      2048s    4095s      2048s                   BIOS_GRUB  bios_grub
- 2      4096s    208895s    204800s    ext2         ARCH_BOOT  boot
- 3      208896s  15732735s  15523840s  ext4         ARCH_ROOT
-#+end_example
-#+begin_src sh
-sed -e '/^#.*$/d' -e '/^ *$/d' /etc/fstab
-#+end_src
-#+begin_example
-/dev/sda3               /               btrfs           rw,relatime,ssd,space_cache     0 1
-/dev/sda2               /boot           ext2            rw,relatime     0 2
-#+end_example
-
-* System Time
-
-Time zone setting.
-#+begin_src sh
-ln -s /usr/share/zoneinfo/Europe/Athens /etc/localtime
-#+end_src
-Use UTC in hardware clock.
-#+begin_src sh
-hwclock --systohc --utc
-#+end_src
-
-* Locale
-
-#+begin_src sh
-sed '/^#.*$/d' /etc/locale.gen
-#+end_src
-#+begin_example
-en_US.UTF-8 UTF-8
-en_US ISO-8859-1
-zh_CN.GB18030 GB18030
-zh_CN.GBK GBK
-zh_CN.UTF-8 UTF-8
-zh_CN GB2312
-#+end_example
-#+begin_src sh
-cat /etc/locale.conf
-#+end_src
-#+begin_example
-LANG="en_US.UTF-8"
-LC_CTYPE="zh_CN.UTF-8"
-#+end_example
-
-* Install a New System
-
-netcfg has been installed default.
-#+begin_src sh
-pacstrap /mnt base base-devel \
-              # net-tools wireless_tools \
-              # dialog elinks \
-              w3m wpa_supplicant \
-              htop git zsh grml-zsh-config
-#+end_src
-Add this to {{{/etc/pacman.conf}}}, then
-#+begin_example
-[archlinuxfr]
-Server = http://repo.archlinux.fr/$arch
-#+end_example
-install yaourt, and delete upon text.
-#+begin_src sh
-pacman -Syy yaourt
-#+end_src
-
-* Users
-
-Rule to create a new user.
-#+begin_src sh
-useradd -m -g users -G wheel,storage,power -s /bin/zsh <username>
-#+end_src
-
-* Graphic (base system)
-
-#+begin_src sh
-pacman -S alsa-utils \
-          xorg-server{,-utils} xorg-{xinit,utils} \
-          xf86-video-{vesa,intel} xf86-input-synaptics \
-          xorg-twm xterm #for test
-#+end_src
-Fonts I use.
-#+begin_src sh
-pacman -S ttf-{dejavu,droid,inconsolata} \ #,envy-code-r} \
-          wqy-microhei
-          terminus-font
-#+end_src
-
-** enlightenment17
-
-#+begin_src sh
-pacman -S enlightenment17
-yaourt -S e-modules-extra-svn terminology econnman-svn
-#+end_src
-#+begin_src sh
-pacman -S lxdm
-systemctl enable lxdm.service
-#+end_src
-
-** monsterwm
-
-pacman -S dmenu
-
-* Daily Software
-
-#+begin_src sh
-pacman -S vim emacs \
-          #opera chromium \
-          luakit flashplugin \
-          fcitx fcitx-{configtool,gtk2,gtk3,qt} \
-          mplayer feh
-          rxvt-unicode zathura
-#+end_src
-
-
 
 * New Start
 
@@ -135,28 +8,34 @@ pacman -S vim emacs \
 ### HW Disk
 fdisk /dev/sda
 
-### Time
+### Mount
+mount /dev/sda2 /mnt
+mount /dev/sda1 /mnt/boot
+
+### Base System
+pacstrap /mnt base base-devel
+genfstab -p /mnt >> /mnt/etc/fstab
+arch-chroot /mnt
+## Hostname
+echo "BlueSmash" > /etc/hostname
+## Time
 ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-
-### Locale
+## Locale
 TODO: sed '..' -i /etc/locale.gen
 /usr/bin/locale-gen
 echo "LANG=\"en_US.UTF-8\"" > /etc/locale.conf
-
-
-### Bootloader (syslinux)
+## mkinitcpio
+mkinitcpio -p linux
+## Bootloader (syslinux)
 # https://wiki.archlinux.org/index.php/Syslinux
 pacman -S syslinux
 syslinux-install_update -i -a -m
 vi /boot/syslinux/syslinux.cfg
 
-
 ### SSD
 # https://wiki.archlinux.org/index.php/Solid_State_Drives
 ## TRIM
 vi /etc/fstab  # add `discard' and `noatime' to ext4 line
-
 ## I/O Scheduler
 # https://wiki.archlinux.org/index.php/Solid_State_Drives#Using_udev_for_one_device_or_HDD.2FSSD_mixed_environment
 cat > /etc/udev/rules.d/60-schedulers.rule << EOF
@@ -167,19 +46,21 @@ ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="cfq"
 EOF
 
+### Add a normal user
+# https://wiki.archlinux.org/index.php/Users_and_Groups#User_management
+useradd -m -g users -s /bin/bash kuu
+usermod -aG wheel kuu
+passwd kuu
 
-### Root passwd & reboot
+### passwd & umount & reboot
 passwd
-unmount /mnt/{boot,}
+umount /mnt/{boot,}
+exit
 reboot
-
 
 ### Yaourt
 # https://wiki.archlinux.org/index.php/Yaourt
 # http://archlinux.fr/yaourt-en#get_it
-CUR_DIR=`pwd`
-BUD_DIR=/tmp/install_yaourt
-mkdir -p $BUD_DIR && cd $BUD_DIR
 curl -O https://aur.archlinux.org/packages/pa/package-query/package-query.tar.gz
 tar zxvf package-query.tar.gz
 cd package-query
@@ -190,36 +71,16 @@ tar zxvf yaourt.tar.gz
 cd yaourt
 makepkg -si
 cd ..
-rm -rf $BUD_DIR
-cd $CUR_DIR
-unset CUR_DIR
-unset BUD_DIR
 
 ### Network
-pacman -S wpa_supplicant
-
-### Devel
-pacman -S python python-pip python-virtualenv
-pacman -S python2
-
-### Wireless
-pacman -S iw
+pacman -S wpa_supplicant iw
 
 ### CPU
 # https://wiki.archlinux.org/index.php/lm_sensors
 pacman -S lm_sensors
 
-### Add a normal user
-# https://wiki.archlinux.org/index.php/Users_and_Groups#User_management
-useradd -m -g users -s /bin/bash kuu
-usermod -aG wheel kuu
-passwd kuu
-#+END_SRC
-
-* sounds control
-
-#+BEGIN_SRC sh
-pacman -S alsa-utils
+### acpi
+pacman -S acpid acpi-eeepc-generic rfkill
 #+END_SRC
 
 * Graphic
@@ -231,6 +92,8 @@ pacman -S xf86-input-synaptics
 
 ### Xorg
 pacman -S xorg-server
+pacman -S xorg-server-utils
+pacman -S xorg-apps
 # for `startx'
 pacman -S xorg-xinit
 
@@ -241,36 +104,26 @@ pacman -S conky
 ### Terminals
 pacman -S rxvt-unicode
 
-#+END_SRC
+### Sound
+pacman -S alsa-utils
 
-* Fonts
-
-#+BEGIN_SRC sh
+### Fonts
 pacman -S ttf-dejavu
 pacman -S terminus-font
 #+END_SRC
 
-* personal configs
-
-** git
+* Personal configs
 
 #+BEGIN_SRC sh
 pacman -S git
-#+END_SRC
 
-#+BEGIN_SRC sh
 git config --global user.name ironyKuU
 git config --global user.email nesuadark@gmail.com
-#+END_SRC
 
-check infomation
-#+BEGIN_SRC sh
+# check infomation
 git config --list
-#+END_SRC
 
-** dotfiles
-
-#+BEGIN_SRC sh
+### dotfiles
 cd ~
 git clone https://github.com/ironyKuU/dotfiles.git
 #+END_SRC
