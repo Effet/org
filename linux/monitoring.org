@@ -1,0 +1,6 @@
+#+TITLE: Monitoring
+#+DATE: <2013-10-05>
+
+* lm_sensors
+
+https://wiki.archlinux.org/index.php/lm_sensors

@@ -1,0 +1,6 @@
+#+TITLE: Music
+#+DATE: <2013-10-05>
+
+* format
+
+http://en.wikipedia.org/wiki/FLAC

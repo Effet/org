@@ -1,0 +1,6 @@
+#+TITLE: Python
+#+DATE: <2013-10-05>
+
+* virtualenv
+
+https://wiki.archlinux.org/index.php/Python_VirtualEnv
