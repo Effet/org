@@ -73,10 +73,13 @@ makepkg -si
 cd ..
 
 ### Kernel
+# http://code.google.com/p/kernel-netbook/wiki/Installation
 yaourt -S kernel-netbook
 vi /boot/syslinux/syslinux.cfg
 
 ### Network
+# https://wiki.archlinux.org/index.php/Wireless_Setup
+# https://wiki.archlinux.org/index.php/WPA_supplicant
 pacman -S wpa_supplicant iw
 
 ### CPU
@@ -85,6 +88,7 @@ pacman -S lm_sensors
 
 ### acpi
 pacman -S acpid rfkill
+# https://github.com/nbigaouette/acpi-eeepc-generic
 yaourt -S acpi-eeepc-generic 
 #+END_SRC
 

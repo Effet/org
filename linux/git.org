@@ -1,5 +1,5 @@
 #+TITLE: GIT
-#+DATE: <2013-08-14>
+#+DATE: <2013-09-30>
 
 * 分治合并
 
@@ -39,4 +39,10 @@ git status --ignore-submodules[=<when>]
 http://stackoverflow.com/questions/61212/removing-untracked-files-from-your-git-working-copy
 #+BEGIN_SRC sh
 git clean -f
+#+END_SRC
+
+* git clone recursive
+
+#+BEGIN_SRC sh
+git clone <url> --recursive
 #+END_SRC
