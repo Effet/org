@@ -1,8 +1,14 @@
 #+TITLE: MS-Windows
-#+DATE: <2013-09-26>
+#+DATE: <2013-10-13>
 
 * package manager
 
 http://en.wikipedia.org/wiki/List_of_software_package_management_systems#Microsoft_Windows
 
 * cygwin
+
+* screen shot
+
+built-in tool =Snipping Tool=
+http://en.wikipedia.org/wiki/Snipping_Tool
+http://superuser.com/questions/404192/can-one-take-a-partial-screen-shot-in-windows-7
