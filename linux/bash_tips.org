@@ -1,7 +1,11 @@
 #+TITLE: bash tips
-#+DATE: <2013-08-09>
+#+DATE: <2013-10-14>
 
 * get the last argument of privious line
 #+BEGIN_EXAMPLE
 <Alt>+.
 #+END_EXAMPLE
+
+* check if command exists
+
+http://stackoverflow.com/questions/592620/check-if-a-program-exists-from-a-bash-script
