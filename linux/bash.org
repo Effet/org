@@ -1,0 +1,22 @@
+#+TITLE: Bash
+#+DATE: <2013-10-16>
+
+* get the last argument of privious line
+#+BEGIN_EXAMPLE
+<Alt>+.
+#+END_EXAMPLE
+
+* check if command exists
+
+http://stackoverflow.com/questions/592620/check-if-a-program-exists-from-a-bash-script
+
+#+BEGIN_SRC sh
+check_cmd_exist() {
+    type "$1" >/dev/null 2>&1
+}
+#+END_SRC
+
+* The =cat << EOF=
+
+http://en.wikipedia.org/wiki/Here_document#Unix-Shells
+http://www.gnu.org/software/bash/manual/bashref.html#Here-Documents

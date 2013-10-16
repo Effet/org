@@ -1,5 +1,5 @@
 #+TITLE: MS-Windows
-#+DATE: <2013-10-14>
+#+DATE: <2013-10-16>
 
 * package manager
 
@@ -21,3 +21,7 @@ HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System
 - 1: disable
 - 0: enable
 http://www.howtogeek.com/howto/windows-vista/disableenable-lock-workstation-functionality-windows-l/
+
+* powershell
+
+http://en.wikipedia.org/wiki/Windows_PowerShell
