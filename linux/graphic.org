@@ -1,7 +1,7 @@
 #+TITLE: Linux Graphic
-#+DATE: <2013-09-07>
+#+DATE: <2013-10-16>
 
-* screan
+* screen
 
 ** information
 
