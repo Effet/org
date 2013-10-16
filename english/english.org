@@ -1,5 +1,5 @@
 #+TITLE: English Learning
-#+DATE: <2013-08-10>
+#+DATE: <2013-10-16>
 
 * Dictionary
 
@@ -20,6 +20,6 @@ http://oxforddictionaries.com/words/that-or-which
 http://grammar.quickanddirtytips.com/which-versus-that.aspx
 
 * have been studying / have studied
-http://www.italki.com/question/104535
 
+http://www.italki.com/question/104535
 http://www.dailywritingtips.com/greek-words/

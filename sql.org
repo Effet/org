@@ -1,0 +1,6 @@
+#+TITLE: SQL
+#+DATE: <2013-10-16>
+
+* aggregate function
+
+http://en.wikipedia.org/wiki/Aggregate_function
