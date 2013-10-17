@@ -5,4 +5,5 @@
 
 ** qt study road (QT学习之路)
 
+- http://www.devbean.net/2012/08/qt-study-road-2-catelog/
 - https://github.com/joinAero/qt-study-road-2
