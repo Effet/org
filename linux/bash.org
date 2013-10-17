@@ -1,10 +1,9 @@
 #+TITLE: Bash
-#+DATE: <2013-10-16>
+#+DATE: <2013-10-17>
 
-* get the last argument of privious line
-#+BEGIN_EXAMPLE
-<Alt>+.
-#+END_EXAMPLE
+* get the last argument of privious command
+
+=<Alt>+.=
 
 * check if command exists
 
@@ -20,3 +19,8 @@ check_cmd_exist() {
 
 http://en.wikipedia.org/wiki/Here_document#Unix-Shells
 http://www.gnu.org/software/bash/manual/bashref.html#Here-Documents
+
+* =<(list)= or =>(list)= form
+
+http://en.wikipedia.org/wiki/Process_substitution
+http://www.gnu.org/software/bash/manual/html_node/Process-Substitution.html
