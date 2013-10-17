@@ -1,0 +1,10 @@
+#+TITLE: Computer Network
+#+DATE: <2013-10-16>
+
+* SOCKS (Socket Secure)
+
+http://en.wikipedia.org/wiki/SOCKS
+
+* CDN
+
+http://en.wikipedia.org/wiki/Content_delivery_network
