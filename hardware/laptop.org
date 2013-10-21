@@ -1,18 +1,17 @@
 #+TITLE: Laptops
-#+DATE: <2013-10-05>
+#+DATE: <2013-10-21>
 
 * Lenovo ZhaoYang K29
 
-http://ideapad.it168.com/thread-2534357-1-1.html
-
+- http://ideapad.it168.com/thread-2534357-1-1.html
+  
 * Novena
 
-http://www.kosagi.com/w/index.php?title=Novena_Main_Page
-http://www.bunniestudios.com/blog/?p=2686
-http://www.bunniestudios.com/blog/?p=3265
-
+- http://www.kosagi.com/w/index.php?title=Novena_Main_Page
+- http://www.bunniestudios.com/blog/?p=2686
+- http://www.bunniestudios.com/blog/?p=3265
+  
 * Barebone
 
-http://en.wikipedia.org/wiki/Barebone_computer
-http://en.wikipedia.org/wiki/Computer_case
-
+- http://en.wikipedia.org/wiki/Barebone_computer
+- http://en.wikipedia.org/wiki/Computer_case

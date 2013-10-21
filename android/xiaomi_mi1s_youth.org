@@ -1,42 +1,27 @@
 #+TITLE: Xiaomi MI1S Youth
-#+DATE: <2013-08-28>
+#+DATE: <2013-10-21>
 
 * this link
 - http:www.xiaomi.com/mi1syouth
-
+  
 * CWM Recovery
 - http://forum.xda-developers.com/showthread.php?p=42674875
-
+  
 * ROM
 
 there are two version of rom
-** 4.1.2 JZO54K Unofficial CyanogenMod 10
-- http://forum.xda-developers.com/showthread.php?t=2067070
-** 4.2.2 JDQ39E Unofficial CyanogenMod 10.1
-- http://forum.xda-developers.com/showthread.php?t=2290097
-
+- 4.1.2 JZO54K Unofficial CyanogenMod 10 -- http://forum.xda-developers.com/showthread.php?t=2067070
+- 4.2.2 JDQ39E Unofficial CyanogenMod 10.1 -- http://forum.xda-developers.com/showthread.php?t=2290097
+- 4.3 JLS36G Unofficial CyanogenMod 10.2 -- http://forum.xda-developers.com/showthread.php?t=2426963
+  
 * Gapps
 
-- use the ultra slim for 4.1.2
-  - http://forum.xda-developers.com/showthread.php?t=2303746
-- Superslim Gapps for JB 4.2.2
-  - http://forum.xda-developers.com/showthread.php?t=2221831
-- Ultra-Slim Gapps Packs [CM 10/10.1]
-  - http://forum.xda-developers.com/showthread.php?t=2303898
-
+- use the ultra slim for 4.1.2 -- http://forum.xda-developers.com/showthread.php?t=2303746
+- Superslim Gapps for JB 4.2.2 -- http://forum.xda-developers.com/showthread.php?t=2221831
+- Ultra-Slim Gapps Packs [CM 10/10.1] -- http://forum.xda-developers.com/showthread.php?t=2303898
+  
 * Physical Keys
 
-** starup in reconvery
-#+BEGIN_EXAMPLE
-Power+VolumeUp
-#+END_EXAMPLE
-
-** starup in fastboot
-#+BEGIN_EXAMPLE
-Power+VolumeUp/Down+PhotoKey
-#+END_EXAMPLE
-
-** quick shot photo
-#+BEGIN_EXAMPLE
-Power+VolumeUp
-#+END_EXAMPLE
+- =Power+VolumeUp= starup in reconvery
+- =Power+VolumeUp= / =Down+PhotoKey= -- starup in fastboot
+- =Power+VolumeUp= -- quick shot photo
