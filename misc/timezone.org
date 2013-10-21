@@ -1,0 +1,6 @@
+#+TITLE: Time Zone
+#+DATE: <2013-10-21>
+
+* tz database (aka IANA Time Zone Database)
+
+- http://en.wikipedia.org/wiki/IANA_time_zone_database

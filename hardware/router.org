@@ -1,0 +1,7 @@
+#+TITLE: Router
+#+DATE: <2013-10-21>
+
+* TP-Link WR703N
+
+- some good words -- http://www.v2ex.com/t/76011 & http://v2ex.com/t/28328
+- openwrt -- http://wiki.openwrt.org/toh/tp-link/tl-wr703n

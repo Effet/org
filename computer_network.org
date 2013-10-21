@@ -1,10 +1,14 @@
 #+TITLE: Computer Network
-#+DATE: <2013-10-16>
+#+DATE: <2013-10-21>
 
 * SOCKS (Socket Secure)
 
-http://en.wikipedia.org/wiki/SOCKS
+- http://en.wikipedia.org/wiki/SOCKS
 
 * CDN
 
-http://en.wikipedia.org/wiki/Content_delivery_network
+- http://en.wikipedia.org/wiki/Content_delivery_network
+
+* NAT traversal
+
+- http://en.wikipedia.org/wiki/NAT_traversal
