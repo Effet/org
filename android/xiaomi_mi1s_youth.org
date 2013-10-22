@@ -22,6 +22,6 @@ there are two version of rom
   
 * Physical Keys
 
-- =Power+VolumeUp= starup in reconvery
+- =Power+VolumeUp= -- starup in reconvery
 - =Power+VolumeUp= / =Down+PhotoKey= -- starup in fastboot
 - =Power+VolumeUp= -- quick shot photo
