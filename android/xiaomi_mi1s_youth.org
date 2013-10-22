@@ -1,5 +1,5 @@
 #+TITLE: Xiaomi MI1S Youth
-#+DATE: <2013-10-21>
+#+DATE: <2013-10-22>
 
 * this link
 - http:www.xiaomi.com/mi1syouth
@@ -22,6 +22,6 @@ there are two version of rom
   
 * Physical Keys
 
-- =Power+VolumeUp= -- starup in reconvery
-- =Power+VolumeUp= / =Down+PhotoKey= -- starup in fastboot
-- =Power+VolumeUp= -- quick shot photo
+- =Power+VolumeUp= -- starup in recovery
+- =Power+VolumeUp+PhotoKey= / =Power+VolumeDown+PhotoKey= -- starup in fastboot
+- =Power+VolumeDown= -- quick shot photo
