@@ -1,5 +1,5 @@
 #+TITLE: Install Archlinux in Eeepc x101
-#+DATE: <2013-09-30>
+#+DATE: <2013-10-24>
 #+TEXT: This section details archlinux in my eeepc x101 notebook.
 
 * New Start
@@ -21,7 +21,7 @@ echo "BlueSmash" > /etc/hostname
 ## Time
 ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 ## Locale
-TODO: sed '..' -i /etc/locale.gen
+sed -i 's/#\(en_US\|zh_CN\)/\1/g' /etc/locale.gen
 /usr/bin/locale-gen
 echo "LANG=\"en_US.UTF-8\"" > /etc/locale.conf
 ## mkinitcpio
