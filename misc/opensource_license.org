@@ -1,0 +1,6 @@
+#+TITLE: Open-source License
+#+DATE: <2013-10-21>
+
+* Relation
+
+- a well-illustrated graph -- http://www.v2ex.com/t/85756
