@@ -1,5 +1,5 @@
 #+TITLE: English Learning
-#+DATE: <2013-10-16>
+#+DATE: <2013-10-30>
 
 * Dictionary
 
@@ -23,3 +23,5 @@ http://grammar.quickanddirtytips.com/which-versus-that.aspx
 
 http://www.italki.com/question/104535
 http://www.dailywritingtips.com/greek-words/
+
+* =Do you feel boring= / =Do you feel bored=

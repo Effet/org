@@ -1,0 +1,10 @@
+#+TITLE: Fix Tools
+#+DATE: <2013-11-05>
+
+* ifixit
+
+- http://www.ifixit.com/
+
+* Geiger counter
+
+- http://en.wikipedia.org/wiki/Geiger_counter
