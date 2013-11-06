@@ -1,27 +1,30 @@
 #+TITLE: MS-Windows
-#+DATE: <2013-10-16>
+#+DATE: <2013-11-06>
 
 * package manager
 
-http://en.wikipedia.org/wiki/List_of_software_package_management_systems#Microsoft_Windows
+- http://en.wikipedia.org/wiki/List_of_software_package_management_systems#Microsoft_Windows
 
 * cygwin
 
 * screen shot
 
-built-in tool =Snipping Tool=
-http://en.wikipedia.org/wiki/Snipping_Tool
-http://superuser.com/questions/404192/can-one-take-a-partial-screen-shot-in-windows-7
+- built-in tool -- =Snipping Tool= [fn:1][fn:2]
 
-* disable Win+L
+* disable Win+L[fn:3]
 
 #+BEGIN_EXAMPLE
 HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System
 #+END_EXAMPLE
 - 1: disable
 - 0: enable
-http://www.howtogeek.com/howto/windows-vista/disableenable-lock-workstation-functionality-windows-l/
 
-* powershell
+* powershell[fn:4]
 
-http://en.wikipedia.org/wiki/Windows_PowerShell
+* Footnotes
+
+[fn:1] http://en.wikipedia.org/wiki/Snipping_Tool
+[fn:2] http://superuser.com/questions/404192/can-one-take-a-partial-screen-shot-in-windows-7
+[fn:3] http://www.howtogeek.com/howto/windows-vista/disableenable-lock-workstation-functionality-windows-l/
+[fn:4] http://en.wikipedia.org/wiki/Windows_PowerShell
+

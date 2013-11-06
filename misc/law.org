@@ -1,6 +1,10 @@
 #+TITLE: Laws
-#+DATE: <2013-11-05>
+#+DATE: <2013-11-06>
 
 * 消费者权益保护法
 
 - 中华人民共和国消费者权益保护法 -- http://baike.baidu.com/view/17125.htm
+
+* 机动车驾驶培训教学与考试大纲
+
+- 机动车驾驶培训教学与考试大纲 -- http://baike.baidu.com/view/9807794.htm
