@@ -1,5 +1,5 @@
 #+TITLE: MS-Windows
-#+DATE: <2013-11-06>
+#+DATE: <2013-11-08>
 
 * package manager
 
@@ -11,6 +11,8 @@
 
 - built-in tool -- =Snipping Tool= [fn:1][fn:2]
 
+* screencast
+- CamStudio[fn:5]
 * disable Win+L[fn:3]
 
 #+BEGIN_EXAMPLE
@@ -27,4 +29,6 @@ HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System
 [fn:2] http://superuser.com/questions/404192/can-one-take-a-partial-screen-shot-in-windows-7
 [fn:3] http://www.howtogeek.com/howto/windows-vista/disableenable-lock-workstation-functionality-windows-l/
 [fn:4] http://en.wikipedia.org/wiki/Windows_PowerShell
+
+[fn:5] http://camstudio.org/
 

@@ -1,11 +1,13 @@
 #+TITLE: Xiaomi MI1S Youth
-#+DATE: <2013-11-06>
+#+DATE: <2013-11-14>
 
 * this link
 - http://www.xiaomi.com/mi1syouth
   
-* CWM Recovery
+* Recovery
+** CWM Recovery
 - http://forum.xda-developers.com/showthread.php?p=42674875
+
   
 * ROM
 
@@ -25,3 +27,7 @@ there are three versions of cyanogenmod rom
 - =Power+VolumeUp= -- starup in recovery
 - =Power+VolumeUp+PhotoKey= / =Power+VolumeDown+PhotoKey= -- starup in fastboot
 - =Power+VolumeDown= -- quick shot photo
+
+* adb
+
+There exits an =android-sdk-platform-tools= package in archlinux, is simply use command =adb= or =fastboot=.
