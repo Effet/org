@@ -1,5 +1,5 @@
 #+TITLE: GIT
-#+DATE: <2013-11-06>
+#+DATE: <2013-11-23>
 
 * 分治合并
 
@@ -9,7 +9,7 @@ http://gitbook.liuhui998.com/5_3.html
 
 use this command
 #+BEGIN_SRC sh
-git remote set-url origin https://github.com/ironyKuU/org.git
+git remote set-url origin https://github.com/Effet/org.git
 #+END_SRC
 
 this project's url:
@@ -17,8 +17,8 @@ this project's url:
 git remote -v
 #+END_SRC
 #+BEGIN_EXAMPLE
-origin  https://github.com/ironyKuU/org.git (fetch)
-origin  https://github.com/ironyKuU/org.git (push)
+origin  https://github.com/Effet/org.git (fetch)
+origin  https://github.com/Effet/org.git (push)
 #+END_EXAMPLE
 
 * ignore changes in git submodules
