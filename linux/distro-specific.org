@@ -1,2 +1,0 @@
-#+TITLE: Distro Specific
-#+DATE: <2013-10-16>

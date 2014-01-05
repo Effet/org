@@ -1,0 +1,11 @@
+#+TITLE: Artworks on Linux OS
+#+DATE: <2014-01-02>
+
+* Arch Linux BBS threads
+
+- https://bbs.archlinux.org/viewforum.php?id=47
+  
+* Tools
+
+- conky
+- dzen

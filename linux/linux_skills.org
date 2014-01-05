@@ -1,5 +1,5 @@
-#+TITLE: Linux Tips
-#+DATE: <2013-09-26>
+#+TITLE: Linux Skills & Tips (mostly in command-line)
+#+DATE: <2014-01-02>
 
 * Simple Http Server
 
@@ -84,3 +84,9 @@ alias rm='rm -I'
 * lsof
 
 http://en.wikipedia.org/wiki/Lsof
+
+* watch
+
+* Android
+
+** go-mtp

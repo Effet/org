@@ -1,0 +1,24 @@
+#+TITLE: Linux in Desktops
+#+DATE: <2014-01-02>
+
+* DE / WM
+
+** i3wm
+
+*** good setups
+
+- https://github.com/ledti/dotfiles
+- http://techblog.sagar.se/blog/2012/09/10/using-conky-with-i3/
+
+* Notification
+
+- http://www.eventd.org/state-art.html
+- http://pbrisbin.com/posts/using_notify_osd_for_xmonad_notifications/
+
+* Laptops
+
+** A beautiful guide
+
+- https://wiki.archlinux.org/index.php/laptop
+
+** Clevo W650SZ
