@@ -1,5 +1,5 @@
 #+TITLE: Linux Skills & Tips (mostly in command-line)
-#+DATE: <2014-01-02>
+#+DATE: <2014-02-13>
 
 * Simple Http Server
 
@@ -90,3 +90,33 @@ http://en.wikipedia.org/wiki/Lsof
 * Android
 
 ** go-mtp
+
+* Multi-boot USB
+
+** syslinux
+
+- http://www.syslinux.org/wiki/index.php/HowTos#How_to_Create_a_Bootable_USB:_For_Linux
+- http://blog.jakgibb.com/2013/01/03/creating-a-multiboot-usb-stick-using-syslinux/
+
+#+BEGIN_SRC bash
+mkfs.vfat -n ICYC -F 32 /dev/sdb1
+#+END_SRC
+
+#+BEGIN_SRC bash
+mount /dev/sdb1 /mnt/usb
+mkdir /mnt/usb/multiboots
+syslinux -d multiboots -i /dev/sdb1
+cp /usr/lib/syslinux/bios/vesamenu.c32 /mnt/usb/multiboots
+#+END_SRC
+
+#+BEGIN_SRC bash
+dd conv=notrunc bs=440 count=1 if=/usr/lib/syslinux/bios/mbr.bin of=/dev/sdb
+#+END_SRC
+
+*** test (using qemu)
+
+- http://superuser.com/questions/395081/test-usb-booting-capabilities-with-qemu-under-linux
+
+#+BEGIN_SRC bash
+sudo qemu-system-x86_64 -enable-kvm -m 256 -usb /dev/sdX
+#+END_SRC
