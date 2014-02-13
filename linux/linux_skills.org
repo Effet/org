@@ -120,3 +120,10 @@ dd conv=notrunc bs=440 count=1 if=/usr/lib/syslinux/bios/mbr.bin of=/dev/sdb
 #+BEGIN_SRC bash
 sudo qemu-system-x86_64 -enable-kvm -m 256 -usb /dev/sdX
 #+END_SRC
+
+* convmv
+
+#+BEGIN_SRC bash
+LANG=C 7z x foo.7z
+convmv -f cp936 -t utf8 -r --notest filename
+#+END_SRC
