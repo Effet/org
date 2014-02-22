@@ -1,5 +1,5 @@
 #+TITLE: Linux Skills & Tips (mostly in command-line)
-#+DATE: <2014-02-13>
+#+DATE: <2014-02-22>
 
 * Simple Http Server
 
@@ -13,17 +13,20 @@ python -m SimpleHTTPServer 8080
 
 [[https://wiki.archlinux.org/index.php/Zsh#Making_Zsh_your_default_shell][ArchLinux Wiki - Making Zsh default]]
 
-* uncompress .deb
+* Extract file
+** .deb
 
 #+begin_src sh
 ar -x *.deb
 #+end_src
 
-* uncompress .rpm
+** .rpm
 
-#+begin_src sh
-rpm2targz *.rpm
-#+end_src
+#+BEGIN_SRC bash
+rpmextract.sh foo.rpm
+#+END_SRC
+
+for Archlinux, =pacman -S rpmextract=
 
 * torrent to magnet
 
