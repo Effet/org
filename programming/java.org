@@ -1,0 +1,18 @@
+#+TITLE: Java (and some relations)
+#+DATE: <2014-04-11>
+
+* Plain Java
+
+** Reflect
+
+* Maven
+
+* Spring Framework
+
+** IoC/DI
+
+** AOP
+
+* Jetty
+
+* Guava
