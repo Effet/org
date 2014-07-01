@@ -1,5 +1,5 @@
 #+TITLE: Linux Skills & Tips (mostly in command-line)
-#+DATE: <2014-02-23>
+#+DATE: <2014-07-01>
 
 * Simple Http Server
 
@@ -134,3 +134,10 @@ convmv -f cp936 -t utf8 -r --notest filename
 * ImageMagick
 
 - a usefull tutorial -- http://xahlee.info/img/imagemagic.html
+
+* recursive change permisstion
+
+#+BEGIN_SRC sh
+find . -type d -exec chmod 755 {} \;
+find . -type f -exec chmod 644 {} \;
+#+END_SRC
