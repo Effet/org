@@ -1,5 +1,5 @@
 #+TITLE: GIT
-#+DATE: <2013-11-23>
+#+DATE: <2014-08-16>
 
 * 分治合并
 
@@ -40,6 +40,10 @@ git clean -f
 #+BEGIN_SRC sh
 git clone <url> --recursive
 #+END_SRC
+
+* pretty `git log` thinking
+
+@ref http://stackoverflow.com/questions/1057564/pretty-git-branch-graphs
 
 * Footnotes
 
