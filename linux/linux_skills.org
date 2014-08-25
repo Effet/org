@@ -1,5 +1,5 @@
 #+TITLE: Linux Skills & Tips (mostly in command-line)
-#+DATE: <2014-07-01>
+#+DATE: <2014-08-25>
 
 * Simple Http Server
 
@@ -12,6 +12,10 @@ python -m SimpleHTTPServer 8080
 * Zsh
 
 [[https://wiki.archlinux.org/index.php/Zsh#Making_Zsh_your_default_shell][ArchLinux Wiki - Making Zsh default]]
+
+* Archiving/Compression Tools
+** XZ
+- http://en.wikipedia.org/wiki/XZ_Utils
 
 * Extract file
 ** .deb
